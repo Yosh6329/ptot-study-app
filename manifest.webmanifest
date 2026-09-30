@@ -1,0 +1,31 @@
+{
+  "name": "PT/OT国試 弱点診断＆自動復習",
+  "short_name": "PTOT国試",
+  "description": "PT/OT国家試験の基礎3科目を診断し、弱点と復習問題を自動整理する学習アプリ",
+  "id": "./",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "display_override": [
+    "standalone",
+    "minimal-ui"
+  ],
+  "background_color": "#f4f6f8",
+  "theme_color": "#0f766e",
+  "lang": "ja-JP",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "./app-icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "./app-icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

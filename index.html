@@ -1,0 +1,1015 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+<meta name="theme-color" content="#0f766e"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="default"/>
+<meta name="apple-mobile-web-app-title" content="PT/OT国試"/>
+<link rel="manifest" href="./manifest.webmanifest"/>
+<link rel="apple-touch-icon" href="./app-icon-192.png"/>
+<title>PT/OT国試 基礎3科目 弱点診断 v1.9</title>
+<style>
+:root{--bg:#f4f6f8;--card:#fff;--text:#15202b;--muted:#64748b;--line:#e2e8f0;--teal:#0f766e;--teal2:#115e59;--good:#15803d;--bad:#b91c1c;--warn:#b45309}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans JP",sans-serif;color:var(--text)}
+.app{max-width:860px;margin:auto;padding:16px 16px 92px}
+.top{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.brand{font-weight:850}
+.version{font-size:12px;padding:5px 9px;border-radius:999px;background:#dff5f2;color:var(--teal2)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:18px;margin:12px 0;box-shadow:0 3px 14px rgba(15,23,42,.04)}
+.hero{background:linear-gradient(135deg,#fff,#edfdf9)}
+h1{font-size:26px;margin:4px 0 10px} h2{font-size:19px;margin:2px 0 12px} h3{font-size:16px;margin:14px 0 7px}
+p{line-height:1.72;margin:8px 0}
+.muted{color:var(--muted)} .small{font-size:12px}
+.note{font-size:12px;background:#fff7ed;color:#7c2d12;padding:10px;border-radius:10px;line-height:1.6}
+.btn{width:100%;border:0;border-radius:12px;padding:14px 16px;background:var(--teal);color:#fff;-webkit-text-fill-color:#fff;font-size:16px;font-weight:750;cursor:pointer}
+.btn.secondary{background:#fff;color:var(--teal2);-webkit-text-fill-color:var(--teal2);border:1px solid #85c8c0}
+.btn.soft{background:#e9f8f6;color:var(--teal2);-webkit-text-fill-color:var(--teal2)}
+.btn:disabled{opacity:.45}
+.actions{display:grid;gap:9px}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.stat{padding:11px;background:#f8fafc;border:1px solid var(--line);border-radius:12px;text-align:center;min-width:0}
+.stat b{display:block;font-size:20px;overflow:hidden;text-overflow:ellipsis}
+.tags{display:flex;gap:6px;flex-wrap:wrap}
+.tag{font-size:12px;padding:4px 7px;background:#eef2f7;border-radius:999px;color:#475569;border:0}
+.source{font-size:12px;color:var(--teal2);font-weight:700;margin:8px 0}
+.figure{margin:14px 0;padding:8px;background:#fff;border:1px solid var(--line);border-radius:14px}
+.figure svg{display:block;width:100%;height:auto}
+.choice{display:block;width:100%;text-align:left;padding:13px;margin:9px 0;border:1px solid #cbd5e1;background:#fff;color:var(--text);-webkit-text-fill-color:var(--text);border-radius:12px;font-size:15px;line-height:1.55;cursor:pointer}
+.choice.sel{border:2px solid var(--teal);background:#eefbf8}
+.choice.ok{border:2px solid var(--good);background:#f0fdf4}
+.choice.ng{border:2px solid var(--bad);background:#fef2f2}
+.confrow{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin:10px 0}
+.conf{padding:10px 4px;border:1px solid var(--line);background:#fff;color:var(--text);-webkit-text-fill-color:var(--text);border-radius:10px;font-weight:650}
+.conf.sel{border:2px solid var(--teal);background:#eefbf8}
+.progress{height:8px;background:#e5e7eb;border-radius:999px;overflow:hidden}
+.progress>div{height:100%;background:var(--teal)}
+.explain{background:#f8fffd;border-left:4px solid var(--teal);padding:13px;border-radius:10px;margin-top:14px}
+.option-ex{padding:10px 0;border-top:1px solid var(--line);font-size:14px;line-height:1.6}
+.knowledge{background:#f8fafc;border:1px solid var(--line);border-radius:10px;padding:11px;margin-top:10px;line-height:1.65}
+.result-good{color:var(--good)} .result-bad{color:var(--bad)}
+.weakcard{padding:12px;border:1px solid var(--line);border-radius:13px;margin:9px 0;background:#fbfcfd}
+.weakhead{display:flex;justify-content:space-between;gap:10px}
+.pill{font-size:11px;font-weight:800;padding:4px 8px;border-radius:999px;background:#dff5f2;color:var(--teal2)}
+.pill.mid{background:#fff7ed;color:var(--warn)}
+.pill.high{background:#fef2f2;color:var(--bad)}
+.row{display:flex;justify-content:space-between;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line)}
+.gloss-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
+.gloss-item{padding:10px;border:1px solid var(--line);border-radius:10px;background:#fff}
+.gloss-item b{display:block;margin-bottom:4px}
+.helpbox{font-size:13px;background:#eefbf8;border:1px solid #b8ece4;color:#115e59;padding:10px;border-radius:10px;line-height:1.65}
+.nav{position:fixed;bottom:0;left:0;right:0;background:rgba(255,255,255,.95);border-top:1px solid var(--line);backdrop-filter:blur(9px)}
+.navin{max-width:860px;margin:auto;display:grid;grid-template-columns:repeat(3,1fr)}
+.nav button{border:0;background:transparent;padding:13px 4px;color:#64748b;font-weight:750}
+.nav button.on{color:var(--teal)}
+.hide{display:none!important}
+.footer-note{font-size:11px;color:#64748b;line-height:1.6;margin-top:16px}
+@media(max-width:640px){
+ .card{padding:15px}
+ h1{font-size:22px}
+ .stat b{font-size:17px}
+ .gloss-grid{grid-template-columns:1fr}
+}
+
+/* v1.3 */
+.subject-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}
+.subject-score{padding:12px;border:1px solid var(--line);border-radius:13px;background:#fff}
+.subject-score .name{font-weight:800;margin-bottom:6px}
+.scoreline{display:flex;align-items:center;gap:8px}.scoreline b{font-size:22px;min-width:42px}
+.meter{height:9px;background:#e2e8f0;border-radius:999px;overflow:hidden;flex:1}.meter>span{display:block;height:100%;background:var(--teal)}
+.data-note{font-size:11px;color:var(--muted);margin-top:5px}.weak-top{display:grid;gap:8px}
+.weak-top button{width:100%;text-align:left;padding:11px;border:1px solid var(--line);background:#fff;border-radius:11px;color:var(--text)}
+.weak-rank{font-weight:850;color:var(--teal2);margin-right:7px}
+.badge-danger,.badge-warn,.badge-good{display:inline-block;font-size:11px;font-weight:800;padding:4px 7px;border-radius:999px}
+.badge-danger{background:#fef2f2;color:#b91c1c}.badge-warn{background:#fff7ed;color:#b45309}.badge-good{background:#f0fdf4;color:#15803d}
+.mode-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.mode-card{padding:12px;border:1px solid var(--line);border-radius:13px;background:#fff}.mode-card b{display:block;margin-bottom:4px}.mode-card .btn{margin-top:9px;padding:10px;font-size:14px}
+.radar-wrap{overflow-x:auto}.radar{display:block;margin:auto;max-width:100%;height:auto}.radar-legend{display:flex;gap:12px;justify-content:center;font-size:11px;color:var(--muted);margin-top:4px}
+.dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:4px}.dot.current{background:#0f766e}.dot.prev{background:#94a3b8}
+.practice-select{display:grid;gap:8px}.selectbtn{width:100%;text-align:left;padding:12px;border:1px solid var(--line);border-radius:11px;background:#fff;color:var(--text);font-weight:700}.selectbtn:hover{background:#f8fafc}
+.diagstatus{display:flex;justify-content:space-between;gap:10px;align-items:center;padding:10px;border:1px solid var(--line);border-radius:11px;background:#fff}
+
+@media(max-width:640px){.subject-grid,.mode-grid{grid-template-columns:1fr}}
+
+
+/* v1.4 */
+.weak-top{display:grid;gap:10px}
+.weak-action{width:100%;text-align:left;border:1px solid var(--line);background:#fff;border-radius:14px;padding:0;overflow:hidden;color:var(--text);cursor:pointer;box-shadow:0 1px 4px rgba(15,23,42,.03)}
+.weak-action:hover{border-color:#85c8c0;background:#fbfffe}
+.weak-action-main{display:flex;gap:11px;align-items:flex-start;padding:13px 13px 9px}
+.weak-action .rankbox{flex:0 0 28px;height:28px;border-radius:9px;background:#e9f8f6;color:var(--teal2);display:grid;place-items:center;font-weight:850}
+.weak-action .weak-copy{min-width:0;flex:1}.weak-action .weak-copy b{font-size:15px}.weak-action .weak-path{font-size:11px;color:var(--muted);margin-top:4px;line-height:1.45}
+.weak-action-footer{border-top:1px solid var(--line);padding:9px 13px;display:flex;justify-content:space-between;align-items:center;color:var(--teal2);font-size:13px;font-weight:800;background:#f8fffd}
+.weak-action-footer small{font-size:11px;color:var(--muted);font-weight:600}
+.axis-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}
+.axis-chip{width:100%;text-align:left;border:1px solid var(--line);background:#fff;border-radius:12px;padding:10px;color:var(--text);cursor:pointer}
+.axis-chip:hover{border-color:#85c8c0;background:#fbfffe}.axis-chip b{display:block;font-size:13px}.axis-chip-meta{display:flex;justify-content:space-between;gap:8px;align-items:center;margin-top:5px;font-size:11px;color:var(--muted)}
+.axis-chip .go{color:var(--teal2);font-weight:800;white-space:nowrap}
+.axis-label{cursor:pointer}.axis-label:hover text{fill:var(--teal2)}
+.axis-detail-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}.backlink{border:0;background:transparent;color:var(--teal2);font-weight:750;padding:4px 0;cursor:pointer}
+.subgroup-card{border:1px solid var(--line);border-radius:13px;padding:12px;margin:9px 0;background:#fff}.subgroup-head{display:flex;justify-content:space-between;gap:10px;align-items:center}.subgroup-score{font-weight:850;font-size:18px}.subgroup-score.mutedscore{font-size:12px;color:var(--muted)}
+.mini-meter{height:7px;background:#e2e8f0;border-radius:999px;overflow:hidden;margin:7px 0}.mini-meter span{display:block;height:100%;background:var(--teal)}
+.concept-list{display:grid;gap:6px;margin-top:8px}.concept-row{display:flex;justify-content:space-between;gap:8px;align-items:center;padding:8px 9px;background:#f8fafc;border-radius:9px;font-size:12px}.concept-row button{border:0;background:transparent;color:var(--teal2);font-weight:800;cursor:pointer}
+.status-unmeasured{font-size:11px;color:#64748b}.status-focus{font-size:11px;color:#b45309;font-weight:800}.status-ok{font-size:11px;color:#15803d;font-weight:800}
+.radar-note{font-size:11px;color:var(--muted);line-height:1.55;margin-top:8px}
+.practice-axis{display:grid;gap:8px}.practice-axis .selectbtn b{display:block}.practice-axis .selectbtn .small{font-weight:500;margin-top:3px;display:block}
+@media(max-width:640px){.axis-grid{grid-template-columns:1fr}}
+
+
+/* v1.6 */
+.navin{grid-template-columns:repeat(4,1fr)}
+.nav-count{display:inline-grid;place-items:center;min-width:17px;height:17px;padding:0 4px;margin-left:2px;border-radius:999px;background:#e2e8f0;color:#475569;font-size:10px;vertical-align:1px}
+.nav button.on .nav-count{background:#dff5f2;color:var(--teal2)}
+.score-caption{font-size:11px;color:var(--muted);font-weight:700;margin-bottom:2px}
+.scoreline b{min-width:auto;font-size:23px;white-space:nowrap}
+.scoreline b small{font-size:12px;color:var(--muted);font-weight:700}
+.metric-note{font-size:11px;color:var(--muted);margin-top:6px;line-height:1.45}
+.explain{background:#fff;border-left:0;padding:0;margin-top:14px}
+.explain-result{padding:13px 14px;border-radius:12px;margin-bottom:10px}
+.explain-result.good{background:#f0fdf4;border:1px solid #bbf7d0}
+.explain-result.bad{background:#fef2f2;border:1px solid #fecaca}
+.section-box{border-radius:12px;padding:13px 14px;margin-top:11px;line-height:1.68}
+.section-box h3{margin:0 0 8px;font-size:15px}
+.section-main{background:#ffffff;border:1px solid #dbe4ee}
+.section-options{background:#f8fafc;border:1px solid #e2e8f0}
+.section-related{background:#eff6ff;border:1px solid #bfdbfe}
+.section-exam{background:#fff7ed;border:1px solid #fed7aa}
+.section-tip{background:#ecfdf5;border:1px solid #a7f3d0}
+.section-answer{background:#f8fafc;border:1px solid #e2e8f0}
+.option-ex{padding:10px 0;border-top:1px solid #e2e8f0;font-size:14px;line-height:1.65}
+.option-ex:first-child{border-top:0}
+.gloss-grid{margin-top:8px}
+.gloss-item{background:#f8fafc;border-color:#dbe4ee}
+.lookup-add{margin-top:8px;border:1px solid #cbd5e1;background:#fff;color:#334155;border-radius:9px;padding:7px 9px;font-size:12px;font-weight:750;cursor:pointer}
+.lookup-add.saved{background:#ecfdf5;border-color:#a7f3d0;color:#047857}
+.lookup-list{display:grid;gap:10px}
+.lookup-card{border:1px solid var(--line);border-radius:14px;background:#fff;padding:13px}
+.lookup-card.done{opacity:.68}
+.lookup-term{font-size:17px;font-weight:850;margin-bottom:5px}
+.lookup-path{font-size:11px;color:var(--muted);line-height:1.5}
+.lookup-actions{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:10px}
+.lookup-actions button{border-radius:9px;padding:9px;border:1px solid var(--line);background:#fff;color:var(--text);font-weight:750;cursor:pointer}
+.lookup-actions .primary{background:#e9f8f6;color:var(--teal2);border-color:#b8ece4}
+.lookup-actions .donebtn{background:#f8fafc}
+.lookup-empty{padding:18px;text-align:center;border:1px dashed #cbd5e1;border-radius:12px;color:var(--muted)}
+.radar-score-label{font-size:9px;fill:#64748b}
+.radar-gap-note{display:inline-block;background:#f8fafc;border:1px solid #e2e8f0;border-radius:999px;padding:5px 8px;margin-top:6px;font-size:10px;color:#64748b}
+.axis-chip-score{font-weight:800;color:#0f766e}
+.axis-detail-score-label{font-size:11px;color:var(--muted);font-weight:700}
+.axis-detail-score-value{font-size:20px;font-weight:850}
+.subgroup-score-label{font-size:10px;color:var(--muted);font-weight:700}
+@media(max-width:640px){
+ .nav button{font-size:11px;padding:12px 2px}
+ .lookup-actions{grid-template-columns:1fr}
+}
+
+
+/* v1.7 */
+.test-mode-badge{display:inline-flex;align-items:center;gap:6px;padding:6px 9px;border-radius:999px;background:#eef2ff;color:#3730a3;font-size:11px;font-weight:800;margin-bottom:8px}
+.diag-note{background:#eef2ff;border:1px solid #c7d2fe;color:#3730a3;padding:10px 12px;border-radius:11px;font-size:12px;line-height:1.6;margin:10px 0}
+.resume-card{background:#fff7ed;border:1px solid #fed7aa;border-radius:14px;padding:13px;margin-top:12px}
+.resume-head{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.resume-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+.resume-actions .btn{padding:10px;font-size:14px}
+.diag-summary-list{display:grid;gap:8px;margin-top:10px}
+.diag-summary-item{width:100%;text-align:left;border:1px solid var(--line);background:#fff;border-radius:12px;padding:11px;color:var(--text);cursor:pointer}
+.diag-summary-item.bad{border-color:#fecaca;background:#fffafa}
+.diag-summary-item.good{border-color:#d1fae5;background:#fbfffd}
+.diag-summary-item b{display:block;margin-bottom:3px}
+.data-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.data-actions .btn{padding:11px;font-size:14px}
+.data-note-box{font-size:12px;color:var(--muted);line-height:1.6;margin-top:8px}
+.file-input{display:none}
+.app-ready{font-size:11px;background:#ecfdf5;color:#047857;border:1px solid #a7f3d0;padding:6px 8px;border-radius:999px;font-weight:800}
+@media(max-width:640px){
+ .resume-actions,.data-actions{grid-template-columns:1fr}
+}
+
+
+/* v1.8 diagnostic result dashboard */
+.diag-hero-score{text-align:center;padding:8px 0 2px}
+.diag-hero-score .fraction{font-size:34px;font-weight:900;letter-spacing:-1px;color:var(--text)}
+.diag-hero-score .percent{font-size:15px;font-weight:800;color:var(--teal2);margin-top:3px}
+.result-subject-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}
+.result-subject{border:1px solid var(--line);background:#fff;border-radius:13px;padding:12px}
+.result-subject .subject-name{font-weight:850;margin-bottom:7px}
+.result-subject .subject-frac{font-size:22px;font-weight:900}
+.result-subject .subject-pct{font-size:12px;color:var(--muted);font-weight:750;margin-left:4px}
+.result-subject .mini-meter{margin-top:8px}
+.conf-matrix{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}
+.conf-cell{border:1px solid var(--line);border-radius:12px;padding:10px;background:#fff}
+.conf-cell.correct{background:#f8fffb;border-color:#d1fae5}
+.conf-cell.wrong{background:#fffafa;border-color:#fee2e2}
+.conf-cell b{display:block;font-size:21px}
+.conf-cell span{font-size:11px;color:var(--muted);line-height:1.35}
+.focus-card{border:1px solid #fed7aa;background:#fff7ed;border-radius:13px;padding:13px}
+.focus-card .focus-count{font-size:26px;font-weight:900;color:#9a3412}
+.focus-card p{margin:5px 0 10px;color:#7c2d12;font-size:12px;line-height:1.6}
+.result-weak-grid{display:grid;gap:9px}
+.result-weak-card{width:100%;text-align:left;border:1px solid var(--line);background:#fff;border-radius:13px;padding:12px;color:var(--text);cursor:pointer}
+.result-weak-card:hover{background:#f8fafc}
+.result-weak-top{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
+.result-weak-title{font-weight:850;font-size:15px}
+.result-weak-score{font-size:12px;font-weight:800;color:var(--teal2);white-space:nowrap}
+.result-weak-path{font-size:11px;color:var(--muted);margin-top:4px}
+.result-weak-action{font-size:12px;color:var(--teal2);font-weight:800;margin-top:8px}
+.change-list{display:grid;gap:8px}
+.change-row{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;border:1px solid var(--line);border-radius:12px;padding:11px;background:#fff}
+.change-main b{display:block;margin-bottom:3px}
+.change-values{font-size:13px;color:#475569}
+.change-delta{font-size:12px;font-weight:850;padding:5px 7px;border-radius:999px;background:#f8fafc;color:#475569}
+.change-delta.up{background:#ecfdf5;color:#047857}
+.change-delta.down{background:#fff7ed;color:#b45309}
+.result-note{font-size:11px;color:var(--muted);line-height:1.55;margin-top:8px}
+.result-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}
+.result-actions .btn{padding:11px;font-size:14px}
+@media(max-width:640px){
+  .result-subject-grid,.conf-matrix,.result-actions{grid-template-columns:1fr}
+}
+
+
+/* v1.9 PWA install UX */
+.install-card{border:1px solid #b8ece4;background:#f0fdfa;border-radius:14px;padding:13px;margin-bottom:12px}
+.install-card.hidden{display:none}
+.install-title{font-weight:900;margin-bottom:5px;color:#0f766e}
+.install-body{font-size:12px;line-height:1.65;color:#334155}
+.install-actions{display:grid;grid-template-columns:1fr auto;gap:8px;margin-top:10px}
+.install-actions .btn{padding:10px 12px;font-size:13px}
+.install-close{border:0;background:transparent;color:#64748b;font-weight:800;cursor:pointer;padding:8px}
+.app-mode-badge{display:inline-flex;align-items:center;gap:5px;padding:5px 8px;border-radius:999px;background:#ecfdf5;color:#047857;border:1px solid #a7f3d0;font-size:10px;font-weight:850;margin-bottom:10px}
+.browser-mode-badge{display:inline-flex;align-items:center;gap:5px;padding:5px 8px;border-radius:999px;background:#f8fafc;color:#475569;border:1px solid #cbd5e1;font-size:10px;font-weight:850;margin-bottom:10px}
+@media(max-width:640px){.install-actions{grid-template-columns:1fr}}
+
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="top"><div class="brand">PT/OT国試 基礎3科目</div><span class="version">v1.9 スマホPWAテスト版</span></div>
+  <div id="screen"></div>
+</div>
+<div class="nav" id="nav"><div class="navin">
+  <button data-p="home" class="on">ホーム</button>
+  <button data-p="weak">弱点分析</button>
+  <button data-p="lookup">あとで調べる <span id="lookupNavCount" class="nav-count"></span></button>
+  <button data-p="hist">履歴</button>
+</div></div>
+<script>
+const Q = [{"id":"60A51","source":"第60回・午前51（出題内容をもとに再構成）","source_session":"午前","source_no":51,"subject":"解剖学","domain":"筋系","topic":"下肢の筋","concept":"大腿内側筋群","secondary":["薄筋","内転筋群","大腿横断面"],"question":"大腿中央部の模式的横断面を示す。矢印 a が示す、最も内側かつ表層に位置する細長い筋はどれか。","options":[{"id":"o1","text":"薄筋"},{"id":"o2","text":"縫工筋"},{"id":"o3","text":"大内転筋"},{"id":"o4","text":"短内転筋"},{"id":"o5","text":"長内転筋"}],"answers":["o1"],"why":"正答は薄筋です。薄筋は大腿内側を縦走する細長い表在筋で、大腿中央部の横断面では内側皮下に近い位置で同定しやすい筋です。内転筋群の中でも最も内側にあり、股関節内転に加え、膝関節をまたいで脛骨内側へ停止するため膝屈曲・下腿内旋にも関与します。","option_explanations":{"o1":"正しい。薄筋は大腿内側の最表層に近い細長い筋で、内転筋群の中でも位置を見分けやすい。","o2":"縫工筋は上前腸骨棘から脛骨内側へ斜走する長い筋で、中央断面ではより前内側に位置する。薄筋とは走行方向と位置関係が異なる。","o3":"大内転筋は大腿内側〜後内側に広く存在する大きな筋で、矢印部のような小さな表在筋ではない。","o4":"短内転筋は長内転筋の深層寄りに位置し、近位部で目立つ。中央断面で最内側表層を占める筋ではない。","o5":"長内転筋は内転筋群の前方寄りに広い筋腹を形成し、薄筋より外側・深部に位置する。"},"related":"内転筋群の位置関係は、前方寄りに長内転筋、深部に短内転筋、後内側に大内転筋、最内側表層に薄筋と整理すると横断面問題に対応しやすくなります。","tip":"『薄筋＝細く、いちばん内側』を基準点にして、そこから他の内転筋の位置を考える。","glossary":[{"term":"薄筋","desc":"大腿内側を走る細長い筋。股関節内転、膝屈曲、下腿内旋に関与する。"},{"term":"大腿横断面","desc":"太ももを輪切りにした断面。筋区画と位置関係の把握に使われる。"},{"term":"内転筋群","desc":"股関節内転に関与する筋群。長内転筋・短内転筋・大内転筋・薄筋などが含まれる。"}],"official_answers":[1],"problemImage":null,"problemImageCaption":"厚生労働省 第60回 午前51 公式問題図","officialFigureUrl":"https://www.mhlw.go.jp/seisakunitsuite/bunya/kenkou_iryou/iryou/topics/dl/tp250428-08a_01.pdf#page=30","exam_links":["鵞足は縫工筋・薄筋・半腱様筋の腱で構成される。","薄筋は閉鎖神経支配で、股関節内転に加えて膝屈曲・下腿内旋にも関与する。"]},{"id":"60A52","source":"第60回・午前52（出題内容をもとに再構成）","source_session":"午前","source_no":52,"subject":"解剖学","domain":"骨格系","topic":"関節の基礎","concept":"関節唇","secondary":["肩関節","股関節","関節安定性"],"question":"関節唇を有する関節を2つ選べ。","options":[{"id":"o1","text":"肩関節"},{"id":"o2","text":"肘関節"},{"id":"o3","text":"股関節"},{"id":"o4","text":"膝関節"},{"id":"o5","text":"足関節"}],"answers":["o1","o3"],"why":"正答は肩関節と股関節です。肩関節には関節窩の周囲を取り囲む関節唇があり、浅い関節窩を深くして上腕骨頭との適合性を高めます。股関節にも寛骨臼唇があり、寛骨臼縁を延長して大腿骨頭の被覆を増やします。どちらも球関節ですが、肩は可動性が特に高く、股関節はより安定性が高いという違いがあります。","option_explanations":{"o1":"正しい。肩関節には関節窩唇があり、関節窩を深くして安定性に寄与する。","o2":"肘関節には典型的な関節唇はない。腕尺関節・腕橈関節などから構成される複合関節である。","o3":"正しい。股関節には寛骨臼唇があり、大腿骨頭の被覆と関節安定性を高める。","o4":"膝関節には半月板があるが、これは関節唇とは異なる線維軟骨構造である。","o5":"足関節には肩・股関節のような関節唇はない。"},"related":"『関節唇』と『半月板』は混同しやすいポイントです。関節唇は関節窩の縁を深くする構造、半月板は関節面間に介在して適合性や荷重分散に関与する構造として区別します。","tip":"球関節のうち、肩＝関節窩唇、股＝寛骨臼唇。","glossary":[{"term":"関節唇","desc":"関節窩の縁を取り囲む線維軟骨。関節窩を深くし、適合性と安定性を高める。"},{"term":"半月板","desc":"膝関節にある線維軟骨。衝撃吸収、適合性向上、荷重分散に関与する。"}],"official_answers":[1,3],"problemImage":null,"problemImageCaption":null,"exam_links":["肩関節では関節窩唇、股関節では寛骨臼唇という名称になる。","膝の半月板は関節唇とは別の線維軟骨構造で、荷重分散・衝撃吸収に関与する。"]},{"id":"60A53","source":"第60回・午前53（出題内容をもとに学習用再構成）","source_session":"午前","source_no":53,"subject":"解剖学","domain":"神経系","topic":"脳神経","concept":"脳神経の機能","secondary":["副神経","胸鎖乳突筋","僧帽筋"],"question":"胸鎖乳突筋と僧帽筋の運動を主に支配する脳神経はどれか。","options":[{"id":"o1","text":"動眼神経"},{"id":"o2","text":"三叉神経"},{"id":"o3","text":"顔面神経"},{"id":"o4","text":"迷走神経"},{"id":"o5","text":"副神経"}],"answers":["o5"],"why":"正答は副神経です。副神経は第11脳神経で、胸鎖乳突筋と僧帽筋の運動に重要です。頸部回旋や肩甲帯の挙上を診るときに、筋作用と神経支配をセットで整理します。","option_explanations":{"o1":"動眼神経は主に外眼筋と上眼瞼挙筋を支配し、副交感線維も含む。","o2":"三叉神経は顔面の知覚と咀嚼筋の運動を担う混合神経。","o3":"顔面神経は表情筋の運動、舌前2/3の味覚などに関与する。","o4":"迷走神経は咽喉頭や胸腹部臓器に広く分布する混合神経。","o5":"正しい。副神経は胸鎖乳突筋と僧帽筋を支配する。"},"related":"脳神経は『番号・名称・主な機能・代表的な評価法』をセットで覚えると整理しやすくなります。副神経障害では肩すくめや反対側への頸部回旋が弱くなります。","tip":"副神経＝胸鎖乳突筋＋僧帽筋。","glossary":[{"term":"副神経","desc":"第11脳神経。胸鎖乳突筋と僧帽筋の運動に関与する。"},{"term":"胸鎖乳突筋","desc":"一側収縮で同側側屈・反対側回旋、両側収縮で頸部屈曲などに関与する。"}],"official_answers":[5],"problemImage":null,"problemImageCaption":null,"exam_links":["舌の運動は舌下神経、表情筋は顔面神経、咀嚼筋は三叉神経第3枝と整理する。","副神経の徒手評価では肩すくめと頭部回旋が重要。"]},{"id":"60A54","source":"第60回・午前54（出題内容をもとに再構成）","source_session":"午前","source_no":54,"subject":"解剖学","domain":"神経系","topic":"上肢末梢神経","concept":"尺骨神経","secondary":["手内在筋","母指内転筋","正中神経"],"question":"尺骨神経の支配を受ける筋はどれか。","options":[{"id":"o1","text":"長母指屈筋"},{"id":"o2","text":"母指内転筋"},{"id":"o3","text":"第1虫様筋"},{"id":"o4","text":"短母指外転筋"},{"id":"o5","text":"短母指屈筋浅頭"}],"answers":["o2"],"why":"正答は母指内転筋です。母指内転筋は尺骨神経深枝に支配され、母指を示指方向へ引き寄せる内転作用を担います。尺骨神経は多くの手内在筋を支配するため、障害時には巧緻運動低下やフロマン徴候（Froment sign）などがみられます。","option_explanations":{"o1":"長母指屈筋は前骨間神経（正中神経の枝）支配で、母指の指節間関節（interphalangeal joint：IP関節）の屈曲を担う。","o2":"正しい。母指内転筋は尺骨神経深枝支配である。","o3":"第1虫様筋は正中神経支配。虫様筋は第1・2が正中神経、第3・4が尺骨神経という分担が重要。","o4":"短母指外転筋は主に正中神経反回枝支配で、母指球筋の代表。","o5":"短母指屈筋の浅頭は主に正中神経支配。深頭は尺骨神経支配となることがあるため、問題文の『浅頭』が決め手。"},"related":"手内在筋では『尺骨神経が多数派』ですが、母指球筋の一部と第1・2虫様筋は正中神経支配です。フロマン徴候（Froment sign）では母指内転筋の弱化を長母指屈筋で代償します。","tip":"母指内転＝尺骨神経。母指対立・外転＝まず正中神経を考える。","glossary":[{"term":"フロマン徴候（Froment sign）","desc":"紙を母指と示指でつまませたとき、尺骨神経麻痺で母指内転筋が弱く、代償的に長母指屈筋が働いて母指の指節間関節（interphalangeal joint：IP関節）が屈曲する所見。"},{"term":"前骨間神経","desc":"正中神経の枝。長母指屈筋、方形回内筋、示指深指屈筋などを支配する。"},{"term":"虫様筋","desc":"手内在筋の一つ。第1・2虫様筋は正中神経、第3・4虫様筋は尺骨神経支配。"}],"official_answers":[2],"problemImage":null,"problemImageCaption":null,"exam_links":["尺骨神経障害ではフロマン徴候（Froment sign）、骨間筋の筋力低下、鉤爪変形などを関連づけて覚える。","虫様筋は第1・2が正中神経、第3・4が尺骨神経支配。"]},{"id":"60A55","source":"第60回・午前55（出題内容をもとに学習用再構成）","source_session":"午前","source_no":55,"subject":"解剖学","domain":"内臓諸器官","topic":"消化器","concept":"食道・胃","secondary":["食道","生理的狭窄","横隔膜"],"question":"食道について正しいのはどれか。","options":[{"id":"o1","text":"全長にわたり骨格筋のみで構成される"},{"id":"o2","text":"気管の前方を下降する"},{"id":"o3","text":"腹部食道は十二指腸へ連続する"},{"id":"o4","text":"横隔膜を通過する部位は生理的狭窄部の一つである"},{"id":"o5","text":"食道粘膜は単層円柱上皮である"}],"answers":["o4"],"why":"正答は『横隔膜を通過する部位は生理的狭窄部の一つである』です。食道には咽頭食道移行部、気管分岐部付近、横隔膜通過部などに狭窄があり、異物停滞や病変部位として重要です。","option_explanations":{"o1":"食道上部には横紋筋が多いが、下部ほど平滑筋が主体となる。","o2":"食道は気管の後方を下降する。","o3":"食道は胃の噴門へ連続する。","o4":"正しい。食道裂孔を通過する付近は生理的狭窄部の一つ。","o5":"食道粘膜は重層扁平上皮である。"},"related":"食道の位置関係では『気管の後方』『横隔膜の食道裂孔』『胃の噴門へ連続』を押さえます。嚥下では上部食道括約筋・食道蠕動・下部食道括約部の協調も関連します。","tip":"食道＝気管の後ろ、横隔膜を通って胃の噴門へ。","glossary":[{"term":"食道裂孔","desc":"横隔膜にある食道の通過部。"},{"term":"生理的狭窄","desc":"食道内腔が解剖学的に狭くなりやすい部位。"}],"official_answers":[4],"problemImage":null,"problemImageCaption":null,"exam_links":["誤嚥は気道への侵入であり、食道通過障害とは区別する。","胃食道逆流では下部食道括約部の機能が関連する。"]},{"id":"60A56","source":"第60回・午前56（出題内容をもとに再構成）","source_session":"午前","source_no":56,"subject":"生理学","domain":"内分泌・栄養・代謝","topic":"ホルモン","concept":"下垂体後葉ホルモン","secondary":["オキシトシン","バソプレシン","抗利尿ホルモン"],"question":"下垂体後葉から血中へ放出されるホルモンを2つ選べ。","options":[{"id":"o1","text":"グレリン"},{"id":"o2","text":"エストロゲン"},{"id":"o3","text":"オキシトシン"},{"id":"o4","text":"バソプレシン"},{"id":"o5","text":"アルドステロン"}],"answers":["o3","o4"],"why":"正答はオキシトシンとバソプレシンです。バソプレシンは抗利尿ホルモン（antidiuretic hormone：ADH）とも呼ばれます。両者は視床下部の神経分泌細胞で合成され、軸索輸送によって下垂体後葉へ運ばれ、そこで貯蔵された後に血中へ放出されます。『下垂体後葉で合成される』わけではない点が重要です。","option_explanations":{"o1":"グレリンは主に胃から分泌され、摂食促進や成長ホルモン分泌促進に関与する。","o2":"エストロゲンは主に卵巣などから分泌される性ホルモン。","o3":"正しい。オキシトシンは子宮収縮や射乳反射に関与する。","o4":"正しい。バソプレシンは抗利尿ホルモン（antidiuretic hormone：ADH）とも呼ばれ、腎集合管での水再吸収を促進する。","o5":"アルドステロンは副腎皮質球状帯から分泌され、ナトリウムイオン（Na⁺）再吸収などに関与する。"},"related":"下垂体前葉から分泌される代表的なホルモンは、成長ホルモン（growth hormone：GH）、副腎皮質刺激ホルモン（adrenocorticotropic hormone：ACTH）、甲状腺刺激ホルモン（thyroid-stimulating hormone：TSH）、黄体形成ホルモン（luteinizing hormone：LH）、卵胞刺激ホルモン（follicle-stimulating hormone：FSH）、プロラクチン（prolactin：PRL）です。後葉は『視床下部で作られたオキシトシンと抗利尿ホルモン（ADH）を貯蔵・放出する場所』と区別します。","tip":"後葉はオキシトシンとバソプレシン（抗利尿ホルモン）。前葉ホルモンと混同しない。","glossary":[{"term":"バソプレシン","desc":"抗利尿ホルモン（antidiuretic hormone：ADH）とも呼ばれる。集合管での水再吸収を促進する。"},{"term":"オキシトシン","desc":"子宮収縮と射乳反射に関与するホルモン。"},{"term":"軸索輸送","desc":"神経細胞体で作られた物質が軸索を通って末端へ運ばれる過程。"}],"official_answers":[3,4],"problemImage":null,"problemImageCaption":null,"exam_links":["抗利尿ホルモン（ADH）の分泌低下では中枢性尿崩症が問題になる。","下垂体前葉と後葉では『どこで合成され、どこから放出されるか』まで区別する。"]},{"id":"60A57","source":"第60回・午前57（出題内容をもとに学習用再構成）","source_session":"午前","source_no":57,"subject":"解剖学","domain":"感覚器","topic":"特殊感覚","concept":"視覚器","secondary":["網膜","黄斑","中心窩","視神経乳頭"],"question":"視覚器について正しいのはどれか。","options":[{"id":"o1","text":"視神経乳頭には錐体細胞が最も密集する"},{"id":"o2","text":"中心窩は視力が最も高い部位である"},{"id":"o3","text":"角膜には血管が豊富に分布する"},{"id":"o4","text":"水晶体は毛様体筋の収縮で扁平になる"},{"id":"o5","text":"網膜の杆体細胞は色覚を主に担う"}],"answers":["o2"],"why":"正答は『中心窩は視力が最も高い部位である』です。黄斑中央の中心窩には錐体細胞が高密度に分布し、精細な中心視に適しています。","option_explanations":{"o1":"視神経乳頭には視細胞がなく、生理的盲点となる。","o2":"正しい。中心窩は錐体細胞が密で、最も高い視力を担う。","o3":"角膜は透明性を保つため正常では血管を欠く。","o4":"近見時には毛様体筋が収縮し、チン小帯の張力が減って水晶体は厚くなる。","o5":"杆体は暗所視に重要で、色覚は主に錐体が担う。"},"related":"中心窩・視神経乳頭・杆体・錐体の違いは頻出です。視路では視神経→視交叉→視索→外側膝状体→視放線→一次視覚野の流れも関連します。","tip":"中心窩＝高視力、視神経乳頭＝盲点。","glossary":[{"term":"中心窩","desc":"黄斑の中央部。錐体が高密度で、精細な中心視を担う。"},{"term":"視神経乳頭","desc":"視神経が眼球を出る部位。視細胞がなく生理的盲点になる。"}],"official_answers":[2],"problemImage":null,"problemImageCaption":null,"exam_links":["杆体＝暗所視、錐体＝色覚・高視力。","視野障害問題では視交叉と視索の位置関係も一緒に押さえる。"]},{"id":"60A58","source":"第60回・午前58（出題内容をもとに学習用再構成）","source_session":"午前","source_no":58,"subject":"解剖学","domain":"体表解剖","topic":"ランドマーク","concept":"動脈触知部位","secondary":["総頸動脈","橈骨動脈","大腿動脈","足背動脈"],"question":"体表から脈拍を触知する部位と動脈の組合せとして正しいのはどれか。","options":[{"id":"o1","text":"胸鎖乳突筋前縁付近 ― 総頸動脈"},{"id":"o2","text":"手関節尺側 ― 橈骨動脈"},{"id":"o3","text":"鼠径靱帯外側端 ― 大腿動脈"},{"id":"o4","text":"内果後方 ― 足背動脈"},{"id":"o5","text":"膝蓋骨前面 ― 膝窩動脈"}],"answers":["o1"],"why":"正答は『胸鎖乳突筋前縁付近―総頸動脈』です。脈拍触知部位は体表解剖の基本で、臨床評価や循環状態の確認にも使います。","option_explanations":{"o1":"正しい。総頸動脈は頸部で胸鎖乳突筋前縁付近に触知できる。","o2":"橈骨動脈は手関節の橈側で触知する。","o3":"大腿動脈は鼠径靱帯中央付近で触知する。","o4":"足背動脈は足背で長母趾伸筋腱の外側付近に触知する。内果後方は後脛骨動脈。","o5":"膝窩動脈は膝窩深部で触知する。"},"related":"代表的な触診部位として、橈骨動脈、上腕動脈、大腿動脈、膝窩動脈、後脛骨動脈、足背動脈を位置とセットで覚えます。","tip":"動脈名だけでなく『どこで触るか』までセット。","glossary":[{"term":"足背動脈","desc":"足背で触知される動脈。末梢循環の確認に用いる。"},{"term":"後脛骨動脈","desc":"内果後方で触知する。"}],"official_answers":[1],"problemImage":null,"problemImageCaption":null,"exam_links":["足背動脈と後脛骨動脈は下肢末梢循環の確認で重要。","上腕動脈は肘窩内側で血圧測定にも関連する。"]},{"id":"60A59","source":"第60回・午前59（出題内容をもとに学習用再構成）","source_session":"午前","source_no":59,"subject":"解剖学","domain":"神経系","topic":"中枢神経","concept":"脊髄","secondary":["脊髄前角","運動ニューロン","脊髄後角"],"question":"骨格筋を支配する下位運動ニューロンの細胞体が主に存在する脊髄の部位はどれか。","options":[{"id":"o1","text":"後索"},{"id":"o2","text":"側索"},{"id":"o3","text":"前角"},{"id":"o4","text":"後角"},{"id":"o5","text":"中心管"}],"answers":["o3"],"why":"正答は脊髄前角です。前角には骨格筋を支配する下位運動ニューロンの細胞体があり、その軸索は前根から末梢へ出ます。","option_explanations":{"o1":"後索は深部感覚などの上行路が通る白質。","o2":"側索には皮質脊髄路や脊髄視床路など複数の伝導路が通る。","o3":"正しい。前角には下位運動ニューロンの細胞体が存在する。","o4":"後角は感覚情報の入力・処理に重要。","o5":"中心管は脊髄中央の髄液を含む管腔。"},"related":"前根＝運動、後根＝感覚という基本と、前角＝運動ニューロン、後角＝感覚入力を対応させます。","tip":"前角＝運動、後角＝感覚。","glossary":[{"term":"下位運動ニューロン","desc":"前角細胞などから骨格筋へ直接指令を送る運動ニューロン。"},{"term":"前根","desc":"脊髄から運動線維が出る根。"}],"official_answers":[3],"problemImage":null,"problemImageCaption":null,"exam_links":["下位運動ニューロン障害では筋萎縮・線維束性収縮・腱反射低下などを関連づける。","上位運動ニューロン障害との比較も頻出。"]},{"id":"60A60","source":"第60回・午前60（出題内容をもとに学習用再構成）","source_session":"午前","source_no":60,"subject":"解剖学","domain":"脈管系","topic":"血管","concept":"脳血管","secondary":["中大脳動脈","線条体動脈","被殻","内包"],"question":"被殻や内包の一部へ血流を送る線条体動脈が主に分枝する動脈はどれか。","options":[{"id":"o1","text":"前大脳動脈"},{"id":"o2","text":"中大脳動脈"},{"id":"o3","text":"後大脳動脈"},{"id":"o4","text":"脳底動脈"},{"id":"o5","text":"後下小脳動脈"}],"answers":["o2"],"why":"正答は中大脳動脈です。中大脳動脈から分枝するレンズ核線条体動脈は、被殻や淡蒼球、内包など深部構造の血流に関与します。","option_explanations":{"o1":"前大脳動脈は主に大脳半球内側面を灌流する。","o2":"正しい。中大脳動脈の穿通枝である線条体動脈は基底核・内包に関与する。","o3":"後大脳動脈は主に後頭葉や側頭葉下面などを灌流する。","o4":"脳底動脈は脳幹・小脳などへの枝を出し、終末で後大脳動脈へ分かれる。","o5":"後下小脳動脈は延髄外側や小脳下面などに関与する。"},"related":"脳血管問題は『表面を走る主幹動脈』と『深部へ入る穿通枝』を分けて整理します。内包・基底核の病変では中大脳動脈系の穿通枝が重要です。","tip":"被殻・内包の深部血流＝中大脳動脈の穿通枝を意識。","glossary":[{"term":"線条体動脈","desc":"中大脳動脈などから深部へ入り、基底核や内包を灌流する穿通枝。"},{"term":"被殻","desc":"大脳基底核を構成する灰白質の一つ。"}],"official_answers":[2],"problemImage":null,"problemImageCaption":null,"exam_links":["中大脳動脈領域では顔面・上肢優位の運動感覚障害や失語・半側空間無視も関連する。","内包後脚には皮質脊髄路が通る。"]},{"id":"60A62","source":"第60回・午前62（出題内容をもとに再構成）","source_session":"午前","source_no":62,"subject":"生理学","domain":"筋","topic":"筋線維・収縮","concept":"筋線維の種類","secondary":["タイプI線維","遅筋","酸化能力"],"question":"タイプII筋線維と比べたとき、タイプI筋線維の特徴として正しいのはどれか。","options":[{"id":"o1","text":"発生張力が小さい"},{"id":"o2","text":"筋線維径が太い"},{"id":"o3","text":"酸化酵素活性が低い"},{"id":"o4","text":"ミオグロビン量が少ない"},{"id":"o5","text":"ミトコンドリア密度が低い"}],"answers":["o1"],"why":"正答は『発生張力が小さい』です。タイプI線維は遅筋線維とも呼ばれ、収縮速度と最大張力は比較的小さい一方、ミトコンドリア・ミオグロビン・毛細血管が豊富で酸化能力が高く、疲労しにくいという特徴があります。姿勢保持や持久的活動に適しています。","option_explanations":{"o1":"正しい。タイプI線維はタイプII線維より収縮速度・発生張力が小さい傾向がある。","o2":"誤り。一般にタイプI線維はタイプII線維より筋線維径が小さい。","o3":"誤り。タイプI線維は有酸素代謝に優れ、酸化酵素活性は高い。","o4":"誤り。ミオグロビンが多く、赤色を呈しやすい。","o5":"誤り。持久的なエネルギー供給を支えるため、タイプI線維ではミトコンドリア密度が高い。"},"related":"タイプI＝遅い・持久力・酸化系、タイプII＝速い・大きな力・解糖系、という対比が基本です。ただし実際の骨格筋は複数タイプが混在します。 また、タイプI線維は小型の運動単位に多く、持続的な姿勢保持で動員されやすい。","tip":"I型は『赤・遅・長持ち』。","glossary":[{"term":"タイプI筋線維","desc":"遅筋線維。酸化能力が高く、疲れにくく、姿勢保持や持久活動に向く。"},{"term":"ミオグロビン","desc":"筋内で酸素を保持する蛋白。多いほど赤色調が強くなる。"},{"term":"酸化酵素活性","desc":"有酸素代謝に関わる酵素活性。タイプI線維では高い。"}],"official_answers":[1],"problemImage":null,"problemImageCaption":null,"exam_links":["タイプI線維は姿勢保持・持久活動に向き、タイプII線維は短時間の高出力に向く。","運動単位の動員は一般に小さい運動単位から大きい運動単位へ進む。"]},{"id":"60A63","source":"第60回・午前63（出題内容をもとに学習用再構成）","source_session":"午前","source_no":63,"subject":"生理学","domain":"自律神経","topic":"自律神経機能","concept":"自律神経系の基本","secondary":["交感神経","副交感神経","節前線維","アセチルコリン"],"question":"自律神経系の一般原則として正しいのはどれか。","options":[{"id":"o1","text":"交感神経節前線維はノルアドレナリンを放出する"},{"id":"o2","text":"副交感神経節後線維はすべてドパミンを放出する"},{"id":"o3","text":"交感神経節後線維はすべてアセチルコリンを放出する"},{"id":"o4","text":"副交感神経節前線維は脊髄胸腰髄から出る"},{"id":"o5","text":"交感神経・副交感神経の節前線維はいずれもアセチルコリンを放出する"}],"answers":["o5"],"why":"正答は『交感神経・副交感神経の節前線維はいずれもアセチルコリンを放出する』です。節前線維は自律神経節でニコチン性アセチルコリン受容体へ作用します。","option_explanations":{"o1":"交感神経節前線維の伝達物質はアセチルコリン。","o2":"副交感神経節後線維も基本的にアセチルコリンを放出する。","o3":"交感神経節後線維は多くがノルアドレナリンだが、汗腺支配など例外がある。","o4":"副交感神経は脳幹および仙髄から出る。","o5":"正しい。節前線維は交感・副交感ともアセチルコリン。"},"related":"自律神経は『起始・節前/節後線維・伝達物質・受容体・臓器反応』を表にして整理すると強いです。","tip":"節前は両方アセチルコリン。節後で違いが出る。","glossary":[{"term":"節前線維","desc":"中枢神経系から自律神経節までの線維。交感・副交感ともアセチルコリンを放出する。"},{"term":"アセチルコリン","desc":"神経伝達物質。自律神経節や神経筋接合部などで重要。"}],"official_answers":[5],"problemImage":null,"problemImageCaption":null,"exam_links":["交感神経節後線維でも汗腺支配はアセチルコリンという例外がある。","副交感神経の起始は脳幹・仙髄。"]},{"id":"60A64","source":"第60回・午前64（出題内容をもとに再構成）","source_session":"午前","source_no":64,"subject":"生理学","domain":"呼吸","topic":"呼吸調節","concept":"呼吸調節機構","secondary":["伸展受容器","迷走神経","化学受容器"],"question":"呼吸調節機構について正しい記述はどれか。","options":[{"id":"o1","text":"呼吸中枢は視床下部にある"},{"id":"o2","text":"末梢化学受容器は椎骨動脈にある"},{"id":"o3","text":"横隔膜・肋間筋は随意的に収縮できない"},{"id":"o4","text":"末梢化学受容器は動脈血酸素分圧の上昇で強く興奮する"},{"id":"o5","text":"肺伸展受容器の情報は迷走神経を介して呼吸中枢へ伝わる"}],"answers":["o5"],"why":"正答は肺伸展受容器からの情報が迷走神経を介して呼吸中枢へ伝わる、です。肺の伸展に関する求心性情報は迷走神経を通って延髄などへ入り、吸気を抑制する反射機構に関与します。呼吸は自律的に制御される一方、一定範囲では随意的にも調節できます。","option_explanations":{"o1":"呼吸リズム形成の主要部位は延髄・橋で、視床下部ではない。","o2":"末梢化学受容器は頸動脈小体と大動脈小体に存在する。","o3":"横隔膜や肋間筋は自動的にも活動するが、息止めや深呼吸のように随意的な調節も可能。","o4":"末梢化学受容器は動脈血酸素分圧（PaO₂）の低下、とくに著明な低下で強く刺激される。","o5":"正しい。肺の伸展受容器からの求心路は迷走神経を通る。"},"related":"中枢化学受容器は主に二酸化炭素変化に由来する髄液pHの変化を感知します。末梢化学受容器は動脈血酸素分圧（PaO₂）の低下、動脈血二酸化炭素分圧（PaCO₂）の上昇、pH低下を感知します。肺伸展受容器からの迷走神経求心路はヘーリング・ブロイエル反射（Hering-Breuer reflex）にも関与します。","tip":"呼吸中枢＝延髄・橋、末梢化学受容器＝頸動脈小体・大動脈小体、肺伸展＝迷走神経。","glossary":[{"term":"迷走神経","desc":"第10脳神経。内臓求心・遠心線維を広く含み、呼吸や循環の調節に関与する。"},{"term":"末梢化学受容器","desc":"頸動脈小体・大動脈小体にある受容器。動脈血酸素分圧（PaO₂）低下、動脈血二酸化炭素分圧（PaCO₂）上昇、pH低下を感知する。"},{"term":"肺伸展受容器","desc":"肺の伸展を感知する受容器。過伸展時に吸気を抑制する反射に関与する。"}],"official_answers":[5],"problemImage":null,"problemImageCaption":null,"exam_links":["呼吸リズム形成の主要部位は延髄・橋。","肺伸展受容器からの迷走神経求心路はヘーリング・ブロイエル反射（Hering-Breuer reflex）と関連する。"]},{"id":"60A65","source":"第60回・午前65（出題内容をもとに学習用再構成）","source_session":"午前","source_no":65,"subject":"生理学","domain":"循環","topic":"刺激伝導・心電図","concept":"刺激伝導系","secondary":["洞房結節","房室結節","His束","Purkinje線維"],"question":"心臓の刺激伝導系について正しいのはどれか。","options":[{"id":"o1","text":"房室結節が通常の一次ペースメーカーである"},{"id":"o2","text":"刺激は心室から心房へ向かって生理的に伝わる"},{"id":"o3","text":"Purkinje線維は心房内にのみ分布する"},{"id":"o4","text":"洞房結節は左心室心尖部にある"},{"id":"o5","text":"房室結節からの興奮はHis束を介して心室伝導系へ進む"}],"answers":["o5"],"why":"正答は『房室結節からの興奮はHis束を介して心室伝導系へ進む』です。通常は洞房結節で発生した興奮が心房を伝わり、房室結節、His束、脚、Purkinje線維へ進みます。","option_explanations":{"o1":"通常の一次ペースメーカーは洞房結節。","o2":"通常は心房から心室へ伝導する。","o3":"Purkinje線維は心室内で興奮を素早く広げる。","o4":"洞房結節は右心房上部、上大静脈開口部付近に位置する。","o5":"正しい。房室結節の後にHis束へ伝導する。"},"related":"心電図ではP波＝心房脱分極、QRS波＝心室脱分極、T波＝心室再分極という対応も一緒に押さえます。","tip":"洞房結節→房室結節→His束→脚→Purkinje線維。","glossary":[{"term":"洞房結節","desc":"通常の心拍を開始する一次ペースメーカー。右心房にある。"},{"term":"His束","desc":"房室結節から心室側へ興奮を伝える刺激伝導路。"}],"official_answers":[5],"problemImage":null,"problemImageCaption":null,"exam_links":["房室結節では伝導が遅延し、心房収縮後に心室収縮が起こる時間をつくる。","心電図の波形と刺激伝導順序を結びつける。"]},{"id":"60A66","source":"第60回・午前66（出題内容をもとに学習用再構成）","source_session":"午前","source_no":66,"subject":"生理学","domain":"血液・免疫","topic":"血液","concept":"血球","secondary":["赤血球","白血球","血小板","止血"],"question":"血球とその主な機能の組合せとして正しいのはどれか。","options":[{"id":"o1","text":"赤血球 ― 抗体産生"},{"id":"o2","text":"好中球 ― 酸素運搬"},{"id":"o3","text":"血小板 ― 一次止血"},{"id":"o4","text":"リンパ球 ― フィブリン分解"},{"id":"o5","text":"好酸球 ― ヘモグロビン産生"}],"answers":["o3"],"why":"正答は『血小板―一次止血』です。血小板は血管損傷部位へ粘着・凝集し、血小板血栓を形成して一次止血に重要です。","option_explanations":{"o1":"抗体産生はBリンパ球から分化した形質細胞が担う。","o2":"酸素運搬は主に赤血球のヘモグロビンが担う。","o3":"正しい。血小板は一次止血で中心的役割を担う。","o4":"フィブリン分解は線溶系のプラスミンなどが担う。","o5":"ヘモグロビンは赤芽球系で産生され、好酸球の主機能ではない。"},"related":"止血は一次止血（血小板）と二次止血（凝固因子によるフィブリン形成）に分けて整理します。白血球は好中球・好酸球・好塩基球・単球・リンパ球の機能を比較します。","tip":"血小板＝一次止血、凝固因子＝二次止血。","glossary":[{"term":"一次止血","desc":"血小板の粘着・凝集により血小板血栓を形成する過程。"},{"term":"二次止血","desc":"凝固系によりフィブリンを形成し血栓を安定化する過程。"}],"official_answers":[3],"problemImage":null,"problemImageCaption":null,"exam_links":["好中球は細菌貪食、好酸球は寄生虫・アレルギー、リンパ球は獲得免疫と関連づける。","線溶系は血栓形成後のフィブリン分解に関与する。"]},{"id":"60A67","source":"第60回・午前67（出題内容をもとに学習用再構成）","source_session":"午前","source_no":67,"subject":"生理学","domain":"咀嚼・嚥下・消化・吸収","topic":"消化吸収","concept":"肝・胆・膵機能","secondary":["胆汁","胆汁酸","脂肪消化","胆嚢"],"question":"胆汁について正しいのはどれか。","options":[{"id":"o1","text":"胆汁酸は脂肪の乳化に関与する"},{"id":"o2","text":"胆汁には蛋白質を分解する主要消化酵素が大量に含まれる"},{"id":"o3","text":"胆汁は膵臓で産生される"},{"id":"o4","text":"胆嚢は胆汁を産生する"},{"id":"o5","text":"胆汁は胃内へ直接分泌される"}],"answers":["o1"],"why":"正答は『胆汁酸は脂肪の乳化に関与する』です。胆汁は肝臓で産生され、胆嚢で濃縮・貯蔵され、十二指腸へ排出されます。","option_explanations":{"o1":"正しい。胆汁酸は脂肪を乳化し、脂肪消化・吸収を助ける。","o2":"胆汁そのものは蛋白分解酵素の主要供給源ではない。","o3":"胆汁は肝臓で産生される。","o4":"胆嚢は胆汁を貯蔵・濃縮する。","o5":"胆汁は総胆管などを通って十二指腸へ流入する。"},"related":"脂質の消化吸収では胆汁酸による乳化と膵リパーゼによる分解を分けて理解します。肝臓・胆嚢・膵臓の役割を混同しないことが重要です。","tip":"胆汁は肝で作る、胆嚢でためる、十二指腸へ出す。","glossary":[{"term":"乳化","desc":"大きな脂肪滴を細かく分散させ、消化酵素が作用しやすくすること。"},{"term":"胆汁酸","desc":"胆汁の主要成分の一つ。脂質の消化吸収を助ける。"}],"official_answers":[1],"problemImage":null,"problemImageCaption":null,"exam_links":["脂肪分解酵素の代表は膵リパーゼ。","総胆管と膵管は十二指腸への流入部で近接する。"]},{"id":"60A68","source":"第60回・午前68（出題内容をもとに学習用再構成）","source_session":"午前","source_no":68,"subject":"生理学","domain":"生殖","topic":"生殖生理","concept":"排卵・月経","secondary":["月経周期","排卵","黄体形成ホルモン","プロゲステロン"],"question":"正常月経周期について正しいのはどれか。","options":[{"id":"o1","text":"排卵は黄体形成ホルモンの急増と関連する"},{"id":"o2","text":"排卵後はプロゲステロン分泌が直ちに消失する"},{"id":"o3","text":"卵胞期は黄体からのプロゲステロンが主体である"},{"id":"o4","text":"月経中はエストロゲンとプロゲステロンが高値を維持する"},{"id":"o5","text":"排卵は通常、月経開始の直後に起こる"}],"answers":["o1"],"why":"正答は『排卵は黄体形成ホルモンの急増と関連する』です。成熟卵胞からのエストロゲン上昇を背景に黄体形成ホルモンのサージが起こり、排卵が誘発されます。","option_explanations":{"o1":"正しい。黄体形成ホルモンのサージは排卵誘発に重要。","o2":"排卵後は黄体が形成され、プロゲステロン分泌が増える。","o3":"卵胞期は卵胞からのエストロゲン分泌が中心。","o4":"月経は黄体退縮に伴うエストロゲン・プロゲステロン低下と関連する。","o5":"一般的な周期では排卵は次回月経開始のおよそ14日前に起こる。"},"related":"月経周期は卵胞期・排卵・黄体期で整理し、卵胞刺激ホルモン、黄体形成ホルモン、エストロゲン、プロゲステロンの変化を対応させます。","tip":"排卵＝黄体形成ホルモンサージ。","glossary":[{"term":"黄体形成ホルモン","desc":"luteinizing hormone。排卵と黄体形成に重要。"},{"term":"黄体期","desc":"排卵後に黄体からプロゲステロンが増える時期。"}],"official_answers":[1],"problemImage":null,"problemImageCaption":null,"exam_links":["プロゲステロンは基礎体温上昇と関連する。","閉経では卵巣機能低下により性腺刺激ホルモンが上昇する。"]},{"id":"60A69","source":"第60回・午前69（出題内容をもとに学習用再構成）","source_session":"午前","source_no":69,"subject":"生理学","domain":"運動","topic":"運動生理","concept":"運動単位","secondary":["運動単位","サイズの原理","神経支配比","α運動ニューロン"],"question":"運動単位について正しいものを2つ選べ。","options":[{"id":"o1","text":"1つの筋線維は複数のα運動ニューロンに同時支配される"},{"id":"o2","text":"精密運動を行う筋ほど1運動単位あたりの筋線維数が多い"},{"id":"o3","text":"大きな運動単位から先に動員される"},{"id":"o4","text":"1個のα運動ニューロンと、それが支配する筋線維群で構成される"},{"id":"o5","text":"一般に小さな運動単位から順に動員される"}],"answers":["o4","o5"],"why":"正答は『1個のα運動ニューロンと、それが支配する筋線維群』と『小さな運動単位から順に動員』です。後者はサイズの原理として知られます。","option_explanations":{"o1":"通常、1本の骨格筋線維は1個のα運動ニューロンから神経支配を受ける。","o2":"眼球運動や手指など精密運動を行う筋では神経支配比が小さい。","o3":"一般には小さい運動単位から動員される。","o4":"正しい。これが運動単位の基本定義。","o5":"正しい。必要な張力が増すにつれてより大きい運動単位が追加動員される。"},"related":"神経支配比が小さいほど微細な力調節に向き、大きいほど大きな力を効率よく発揮できます。タイプI線維を含む小型運動単位は低強度から動員されやすいです。","tip":"運動単位＝1ニューロン＋支配筋線維。動員は小→大。","glossary":[{"term":"サイズの原理","desc":"筋力要求の増加に応じて、小さい運動単位から大きい運動単位へ動員される原則。"},{"term":"神経支配比","desc":"1個の運動ニューロンが支配する筋線維数。"}],"official_answers":[4,5],"problemImage":null,"problemImageCaption":null,"exam_links":["眼筋や手内在筋は神経支配比が小さく精密制御に向く。","タイプI筋線維と小型運動単位の関係も合わせて覚える。"]},{"id":"60A70","source":"第60回・午前70（出題内容をもとに学習用再構成）","source_session":"午前","source_no":70,"subject":"生理学","domain":"呼吸","topic":"換気","concept":"肺胞換気量","secondary":["一回換気量","死腔換気量","呼吸数","肺胞換気"],"question":"肺胞換気量を増加させる変化として正しいものを2つ選べ。","options":[{"id":"o1","text":"一回換気量を保ったまま呼吸数を低下させる"},{"id":"o2","text":"死腔換気量を減少させる"},{"id":"o3","text":"一回換気量を増加させる"},{"id":"o4","text":"死腔換気量を増加させる"},{"id":"o5","text":"呼吸を停止する"}],"answers":["o2","o3"],"why":"正答は『死腔換気量を減少させる』と『一回換気量を増加させる』です。肺胞換気量は、1回の呼吸で肺胞に届く有効換気量と呼吸数で決まります。","option_explanations":{"o1":"他条件が同じなら呼吸数低下は分時の肺胞換気を減らす。","o2":"正しい。死腔が減れば同じ一回換気量でも肺胞へ届く割合が増える。","o3":"正しい。一回換気量が増え、死腔を超える分が増えれば肺胞換気は増える。","o4":"死腔が増えると有効な肺胞換気は減る。","o5":"呼吸停止では肺胞換気は0になる。"},"related":"肺胞換気量は『（一回換気量－死腔換気量）×呼吸数』で整理できます。浅く速い呼吸では分時換気量が同じでも肺胞換気が低くなることがあります。","tip":"一回換気量から死腔を引いた分が肺胞へ届く。","glossary":[{"term":"死腔","desc":"換気はされるがガス交換に直接参加しない気道・肺胞領域。"},{"term":"肺胞換気量","desc":"1分間に肺胞へ到達しガス交換に関与する換気量。"}],"official_answers":[2,3],"problemImage":null,"problemImageCaption":null,"exam_links":["分時換気量と肺胞換気量は同じではない。","浅速呼吸では死腔の占める割合が大きくなりやすい。"]},{"id":"60A71","source":"第60回・午前71（出題内容をもとに学習用再構成）","source_session":"午前","source_no":71,"subject":"運動学","domain":"四肢・体幹の運動","topic":"顔面・頭頸部","concept":"頸椎運動","secondary":["胸鎖乳突筋","頸椎屈曲","頸椎回旋"],"question":"頭頸部の運動と筋作用の組合せとして正しいのはどれか。","options":[{"id":"o1","text":"右胸鎖乳突筋 ― 頭部右回旋"},{"id":"o2","text":"両側板状筋 ― 頸部屈曲"},{"id":"o3","text":"左斜角筋 ― 頸部右側屈のみ"},{"id":"o4","text":"両側胸鎖乳突筋 ― 頸部屈曲"},{"id":"o5","text":"後頭下筋群 ― 頸部屈曲"}],"answers":["o4"],"why":"正答は『両側胸鎖乳突筋―頸部屈曲』です。胸鎖乳突筋は一側収縮で同側側屈・反対側回旋、両側収縮で頸部屈曲に関与します。","option_explanations":{"o1":"右胸鎖乳突筋は主に左回旋に作用する。","o2":"板状筋は両側で頸部伸展に作用する。","o3":"斜角筋は同側側屈などに関与し、記述が限定的すぎる。","o4":"正しい。両側胸鎖乳突筋は頸部屈曲に関与する。","o5":"後頭下筋群は主に上位頸椎の伸展・回旋に関与する。"},"related":"頸部筋は『一側作用』と『両側作用』を分けて覚えるのが重要です。胸鎖乳突筋は呼吸補助筋としても働きます。","tip":"胸鎖乳突筋：一側＝反対側回旋、両側＝屈曲。","glossary":[{"term":"胸鎖乳突筋","desc":"頸部表層の大きな筋。一側・両側で作用が異なる。"}],"official_answers":[4],"problemImage":null,"problemImageCaption":null,"exam_links":["副神経支配と胸鎖乳突筋・僧帽筋を関連づける。","頸部筋の問題は回旋方向の左右を取り違えやすい。"]},{"id":"60A72","source":"第60回・午前72（出題内容をもとに学習用再構成）","source_session":"午前","source_no":72,"subject":"運動学","domain":"四肢・体幹の運動","topic":"股関節","concept":"股関節運動","secondary":["股関節","頸体角","腸骨大腿靱帯","関節軸"],"question":"股関節の構造・運動について正しいものを2つ選べ。","options":[{"id":"o1","text":"成人の大腿骨頸体角は通常90度未満である"},{"id":"o2","text":"腸骨大腿靱帯は股関節伸展を制限する"},{"id":"o3","text":"股関節は球関節で3軸性の運動が可能である"},{"id":"o4","text":"股関節屈曲では大腿骨頭が寛骨臼から離開するのが正常である"},{"id":"o5","text":"大腿骨頭は膝窩で脛骨と関節を形成する"}],"answers":["o2","o3"],"why":"正答は『腸骨大腿靱帯は伸展を制限する』と『股関節は球関節で3軸性』です。股関節は高い安定性を持ちながら屈伸・内外転・内外旋が可能です。","option_explanations":{"o1":"成人の頸体角は一般に約125度前後で、90度未満が通常ではない。","o2":"正しい。腸骨大腿靱帯は強靱で、とくに伸展を制限する。","o3":"正しい。球関節で多方向の運動が可能。","o4":"正常な股関節屈曲で大腿骨頭が大きく離開するわけではない。","o5":"大腿骨頭は寛骨臼と関節を形成する。"},"related":"股関節では頸体角、前捻角、靱帯、関節包内運動を関連づけます。開放運動連鎖と閉鎖運動連鎖で骨盤・大腿骨の動きが変わる点も重要です。","tip":"股関節＝球関節。腸骨大腿靱帯＝伸展制限。","glossary":[{"term":"頸体角","desc":"大腿骨頸部軸と骨幹軸のなす角。成人で一般に約125度前後。"},{"term":"腸骨大腿靱帯","desc":"股関節前面の強い靱帯。伸展制限に重要。"}],"official_answers":[2,3],"problemImage":null,"problemImageCaption":null,"exam_links":["トレンデレンブルグ徴候（Trendelenburg sign）は中殿筋など股関節外転筋機能と関連する。","股関節の屈曲拘縮ではトーマステスト（Thomas test）が関連する。"]},{"id":"60A73","source":"第60回・午前73（出題内容をもとに再構成）","source_session":"午前","source_no":73,"subject":"運動学","domain":"姿勢","topic":"姿勢制御","concept":"立位安定性","secondary":["支持基底面","重心線","摩擦"],"question":"静的立位の安定性について正しいのはどれか。","options":[{"id":"o1","text":"支持基底面が狭いほど安定する"},{"id":"o2","text":"重心位置が高いほど安定する"},{"id":"o3","text":"重心線は膝関節中心よりやや前方を通る"},{"id":"o4","text":"足底と床の摩擦が小さいほど安定する"},{"id":"o5","text":"重心線は支持基底面の中心から離れるほど安定する"}],"answers":["o3"],"why":"正答は『重心線は膝関節中心よりやや前方を通る』です。正常立位では重心線は膝関節軸のやや前方を通り、膝には軽い伸展方向の外力モーメントが生じます。安定性そのものは、支持基底面が広い、重心が低い、重心線が支持基底面中央に近い、床との摩擦が十分あるほど高くなります。","option_explanations":{"o1":"支持基底面が広いほど、重心線をその内部に保てる範囲が大きくなるため安定性は高い。","o2":"重心が低いほど転倒方向へのモーメントが小さくなり、一般に安定する。","o3":"正しい。正常立位では重心線は膝関節中心のやや前方を通る。","o4":"摩擦が小さいと滑りやすくなり、支持面との安定性は低下する。","o5":"重心線が支持基底面の縁へ近づくほど、わずかな外乱で基底面外へ出やすくなる。"},"related":"静的安定性は『支持基底面・重心高・重心線の位置・摩擦』の4点で整理すると、多くの姿勢問題に対応できます。","tip":"広い・低い・中央・滑らない＝安定。","glossary":[{"term":"支持基底面","desc":"身体を支える面の範囲。立位では両足底とその間の面で表される。"},{"term":"重心線","desc":"重心から鉛直下方に下ろした線。支持基底面内にあることが安定の条件。"},{"term":"摩擦","desc":"床と足底が滑らないための抵抗。小さいと姿勢保持が不利になる。"}],"official_answers":[3],"problemImage":null,"problemImageCaption":null,"exam_links":["安定性は『支持基底面が広い・重心が低い・重心線が中央に近い・摩擦が大きい』ほど高い。","姿勢制御では足関節戦略・股関節戦略・ステッピング戦略も関連して問われる。"]},{"id":"60A74","source":"第60回・午前74（出題内容をもとに学習用再構成）","source_session":"午前","source_no":74,"subject":"運動学","domain":"歩行","topic":"歩行周期","concept":"歩行周期イベント","secondary":["歩行周期","立脚中期","遊脚期","両脚支持期"],"question":"正常歩行について正しいのはどれか。","options":[{"id":"o1","text":"遊脚期は歩行周期の約60％を占める"},{"id":"o2","text":"立脚中期では身体重心が支持脚の上方を通過する"},{"id":"o3","text":"両脚支持期は走行時に増加する"},{"id":"o4","text":"初期接地では股関節は最大伸展位にある"},{"id":"o5","text":"遊脚終期では膝は最大屈曲位にある"}],"answers":["o2"],"why":"正答は『立脚中期では身体重心が支持脚の上方を通過する』です。正常歩行では立脚期が約60％、遊脚期が約40％で、立脚中期では身体が支持足の上を前方へ進みます。","option_explanations":{"o1":"遊脚期はおよそ40％。","o2":"正しい。立脚中期では身体が支持脚上を進む。","o3":"走行では両脚支持期がなく、両脚が浮く時期が生じる。","o4":"初期接地では股関節は屈曲位。","o5":"遊脚終期では膝は伸展方向へ戻り、次の接地に備える。"},"related":"歩行周期は初期接地・荷重応答・立脚中期・立脚終期・前遊脚・遊脚初期・遊脚中期・遊脚終期の順序で整理します。","tip":"立脚60％、遊脚40％。走行では両脚支持が消える。","glossary":[{"term":"立脚中期","desc":"片脚支持となり、身体が支持足の上を通過する時期。"},{"term":"両脚支持期","desc":"歩行中に両足が同時に接地している時期。"}],"official_answers":[2],"problemImage":null,"problemImageCaption":null,"exam_links":["歩行速度が上がると両脚支持時間は短くなる。","床反力・関節モーメント・筋活動を周期イベントと結びつける。"]},{"id":"60B51","source":"第60回・午後51（出題内容をもとに学習用再構成）","source_session":"午後","source_no":51,"subject":"解剖学","domain":"骨格系","topic":"骨の構造・代謝","concept":"骨形成・骨吸収","secondary":["骨芽細胞","破骨細胞","骨代謝","骨リモデリング"],"question":"骨代謝について正しいのはどれか。","options":[{"id":"o1","text":"破骨細胞は骨吸収に関与する"},{"id":"o2","text":"骨芽細胞は骨吸収を主に行う"},{"id":"o3","text":"骨細胞は破骨細胞から分化する"},{"id":"o4","text":"副甲状腺ホルモンは常に骨形成のみを促進する"},{"id":"o5","text":"骨リモデリングは成長期にのみ起こる"}],"answers":["o1"],"why":"正答は『破骨細胞は骨吸収に関与する』です。骨は生涯にわたり形成と吸収を繰り返しており、骨芽細胞が骨形成、破骨細胞が骨吸収を担います。","option_explanations":{"o1":"正しい。破骨細胞は多核細胞で骨吸収を担う。","o2":"骨芽細胞は骨基質形成・石灰化に関与する。","o3":"骨細胞は骨芽細胞が骨基質内に取り込まれて成熟した細胞。","o4":"副甲状腺ホルモンは血中カルシウム濃度調節に関与し、作用は単純な『骨形成のみ』ではない。","o5":"骨リモデリングは成人以降も継続する。"},"related":"骨代謝では骨芽細胞・破骨細胞に加え、副甲状腺ホルモン、活性型ビタミンD、カルシトニン、機械的負荷との関係も押さえます。","tip":"骨芽細胞＝形成、破骨細胞＝吸収。","glossary":[{"term":"骨リモデリング","desc":"古い骨を吸収し新しい骨を形成する更新過程。成人でも続く。"},{"term":"破骨細胞","desc":"骨吸収を担う多核細胞。"}],"official_answers":[1],"problemImage":null,"problemImageCaption":null,"exam_links":["骨粗鬆症では骨強度低下と骨折リスク上昇を関連づける。","長期不動では機械的負荷低下により骨量低下が問題になる。"]},{"id":"60B56","source":"第60回・午後56（出題内容をもとに再構成）","source_session":"午後","source_no":56,"subject":"解剖学","domain":"筋系","topic":"上肢の筋","concept":"第1背側腱区画","secondary":["長母指外転筋","短母指伸筋","解剖学的嗅ぎタバコ入れ"],"question":"右手を母指橈側外転させた模式図を示す。橈側手関節部で並走して目立つ2本の腱はどれか。2つ選べ。","options":[{"id":"o1","text":"短母指外転筋"},{"id":"o2","text":"短母指伸筋"},{"id":"o3","text":"長橈側手根伸筋"},{"id":"o4","text":"長母指外転筋"},{"id":"o5","text":"長母指伸筋"}],"answers":["o2","o4"],"why":"正答は短母指伸筋と長母指外転筋です。この2腱は手関節背側の第1伸筋腱区画を一緒に通過し、母指を橈側へ開いたとき橈骨茎状突起付近で目立ちます。長母指伸筋は第3区画を通り、解剖学的嗅ぎタバコ入れの尺側境界を形成するので位置が異なります。","option_explanations":{"o1":"短母指外転筋は母指球の筋で、図の橈側手関節部を長い腱として走行する筋ではない。","o2":"正しい。短母指伸筋は長母指外転筋とともに第1背側腱区画を通る。","o3":"長橈側手根伸筋は第2背側腱区画を通り、より尺側寄りに位置する。","o4":"正しい。長母指外転筋は短母指伸筋と並走して第1背側腱区画を通る。","o5":"長母指伸筋は第3背側腱区画を通り、リスター結節（Lister tubercle）を回り込んで走る。"},"related":"ドゥ・ケルバン腱鞘炎は、第1背側腱区画を通る長母指外転筋（abductor pollicis longus：APL）と短母指伸筋（extensor pollicis brevis：EPB）の腱鞘障害です。アイヒホッフテスト（Eichhoff test）は、母指を手掌内に入れて握り込み、手関節を尺屈して橈骨茎状突起周囲の疼痛を誘発します。フィンケルシュタインテスト（Finkelstein test）は別の手技で、両者はしばしば混同されます。解剖学的嗅ぎタバコ入れの橈側境界は長母指外転筋と短母指伸筋、尺側境界は長母指伸筋（extensor pollicis longus：EPL）です。","tip":"第1背側腱区画＝長母指外転筋（APL）＋短母指伸筋（EPB）。長母指伸筋（EPL）は第3背側腱区画。","glossary":[{"term":"解剖学的嗅ぎタバコ入れ","desc":"母指を伸ばしたとき手背橈側にできる陥凹。橈側境界は長母指外転筋（APL）・短母指伸筋（EPB）、尺側境界は長母指伸筋（EPL）。"},{"term":"ドゥ・ケルバン腱鞘炎","desc":"第1背側腱区画の長母指外転筋（APL）と短母指伸筋（EPB）に生じる腱鞘障害。"},{"term":"アイヒホッフテスト","desc":"母指を手掌内に入れて握り込み、手関節を尺屈して橈側手関節痛を誘発する検査。ドゥ・ケルバン腱鞘炎で用いられる。"},{"term":"フィンケルシュタインテスト","desc":"ドゥ・ケルバン腱鞘炎の誘発検査。アイヒホッフテストとは手技が異なるため、混同しない。"},{"term":"リスター結節（Lister tubercle）","desc":"橈骨背側の骨性隆起。長母指伸筋（EPL）の腱がここを回り込む。"}],"official_answers":[2,4],"problemImage":null,"problemImageCaption":"厚生労働省 第60回 午後56 公式問題図","officialFigureUrl":"https://www.mhlw.go.jp/seisakunitsuite/bunya/kenkou_iryou/iryou/topics/dl/tp250428-08b_01.pdf#page=34","exam_links":["ドゥ・ケルバン腱鞘炎では第1背側腱区画の長母指外転筋（APL）・短母指伸筋（EPB）が対象。","アイヒホッフテストとフィンケルシュタインテストは別手技。名称を混同しない。","解剖学的嗅ぎタバコ入れの底には舟状骨・大菱形骨が位置し、橈骨動脈が通る。"]},{"id":"60B57","source":"第60回・午後57（出題内容をもとに学習用再構成）","source_session":"午後","source_no":57,"subject":"解剖学","domain":"筋系","topic":"筋の構造","concept":"起始・停止","secondary":["起始・停止","小円筋","大結節","回旋筋腱板"],"question":"筋と停止部の組合せとして正しいのはどれか。","options":[{"id":"o1","text":"棘上筋 ― 上腕骨小結節"},{"id":"o2","text":"小円筋 ― 上腕骨大結節"},{"id":"o3","text":"肩甲下筋 ― 上腕骨大結節"},{"id":"o4","text":"上腕二頭筋 ― 尺骨粗面"},{"id":"o5","text":"上腕三頭筋 ― 橈骨粗面"}],"answers":["o2"],"why":"正答は『小円筋―上腕骨大結節』です。小円筋は回旋筋腱板を構成し、上腕骨大結節の下部に停止します。","option_explanations":{"o1":"棘上筋は上腕骨大結節に停止する。","o2":"正しい。小円筋は大結節に停止する。","o3":"肩甲下筋は上腕骨小結節に停止する。","o4":"上腕二頭筋は橈骨粗面に停止する。","o5":"上腕三頭筋は尺骨肘頭に停止する。"},"related":"肩関節周囲では回旋筋腱板4筋の起始・停止・作用・支配神経をまとめて覚えると効率的です。","tip":"回旋筋腱板：棘上・棘下・小円＝大結節、肩甲下＝小結節。","glossary":[{"term":"回旋筋腱板","desc":"棘上筋・棘下筋・小円筋・肩甲下筋からなる腱性構造。肩関節安定化に重要。"},{"term":"大結節","desc":"上腕骨近位外側の隆起。棘上筋・棘下筋・小円筋が停止する。"}],"official_answers":[2],"problemImage":null,"problemImageCaption":null,"exam_links":["棘上筋＝外転初期、棘下筋・小円筋＝外旋、肩甲下筋＝内旋。","腋窩神経障害では小円筋と三角筋の機能低下を考える。"]},{"id":"60B58","source":"第60回・午後58（出題内容をもとに学習用再構成）","source_session":"午後","source_no":58,"subject":"解剖学","domain":"神経系","topic":"伝導路","concept":"錐体路","secondary":["皮質脊髄路","内包","大脳脚","錐体交叉"],"question":"皮質脊髄路の走行に含まれる構造はどれか。","options":[{"id":"o1","text":"視床下部"},{"id":"o2","text":"脳弓"},{"id":"o3","text":"大脳脚"},{"id":"o4","text":"海馬"},{"id":"o5","text":"松果体"}],"answers":["o3"],"why":"正答は大脳脚です。皮質脊髄路は大脳皮質から内包を通り、中脳の大脳脚、橋、延髄錐体へ下降し、多くの線維が錐体交叉で反対側へ移ります。","option_explanations":{"o1":"視床下部は自律・内分泌調節などに重要だが皮質脊髄路の主要走行部ではない。","o2":"脳弓は海馬系の線維束で辺縁系に関与する。","o3":"正しい。皮質脊髄路は中脳の大脳脚を通る。","o4":"海馬は記憶に重要な灰白質構造。","o5":"松果体はメラトニン分泌に関与する。"},"related":"皮質脊髄路は『運動野→放線冠→内包後脚→大脳脚→橋→延髄錐体→錐体交叉→脊髄』の順で押さえます。","tip":"錐体路は内包と大脳脚を必ず通る。","glossary":[{"term":"皮質脊髄路","desc":"随意運動に重要な下行性運動路。"},{"term":"錐体交叉","desc":"延髄下部で皮質脊髄路線維の多くが反対側へ交叉する部位。"}],"official_answers":[3],"problemImage":null,"problemImageCaption":null,"exam_links":["内包病変は狭い部位でも広範な運動麻痺を生じうる。","上位運動ニューロン徴候と皮質脊髄路を関連づける。"]},{"id":"60B62","source":"第60回・午後62（出題内容をもとに学習用再構成）","source_session":"午後","source_no":62,"subject":"生理学","domain":"神経","topic":"反射","concept":"伸張反射","secondary":["筋紡錘","Ia群線維","II群線維","Ib群線維"],"question":"筋紡錘からの求心性線維を2つ選べ。","options":[{"id":"o1","text":"Ia群線維"},{"id":"o2","text":"Ib群線維"},{"id":"o3","text":"II群線維"},{"id":"o4","text":"III群線維"},{"id":"o5","text":"IV群線維"}],"answers":["o1","o3"],"why":"正答はIa群線維とII群線維です。筋紡錘は筋の長さや伸張速度を感知し、Ia群・II群求心性線維を介して中枢へ情報を送ります。","option_explanations":{"o1":"正しい。Ia群線維は筋紡錘一次終末からの求心性線維。","o2":"Ib群線維は主に腱器官からの求心性線維。","o3":"正しい。II群線維は筋紡錘二次終末からの求心性線維。","o4":"III群線維は筋紡錘の主要求心性線維ではない。","o5":"IV群線維は無髄の細い線維で、筋紡錘の主要求心性線維ではない。"},"related":"伸張反射では筋紡錘→Ia群線維→α運動ニューロンという基本回路を押さえます。ゴルジ腱器官（Golgi tendon organ）はIb群線維と対応します。","tip":"筋紡錘＝Ia・II、ゴルジ腱器官（Golgi tendon organ）＝Ib。","glossary":[{"term":"筋紡錘","desc":"筋長とその変化を検出する固有受容器。"},{"term":"ゴルジ腱器官（Golgi tendon organ）","desc":"筋腱移行部にあり、筋張力を検出する受容器。"}],"official_answers":[1,3],"problemImage":null,"problemImageCaption":null,"exam_links":["腱反射は筋紡錘を利用した伸張反射。","相反性抑制では拮抗筋の活動低下が起こる。"]},{"id":"60B69","source":"第60回・午後69（出題内容をもとに再構成）","source_session":"午後","source_no":69,"subject":"運動学","domain":"四肢・体幹の運動","topic":"肩甲帯・肩","concept":"肩甲骨運動","secondary":["僧帽筋下部","上方回旋","前鋸筋"],"question":"肩甲骨に作用する筋と運動の組合せとして正しいのはどれか。","options":[{"id":"o1","text":"僧帽筋上部線維 ― 外転"},{"id":"o2","text":"僧帽筋下部線維 ― 上方回旋"},{"id":"o3","text":"菱形筋 ― 下制"},{"id":"o4","text":"前鋸筋 ― 下方回旋"},{"id":"o5","text":"小胸筋 ― 挙上"}],"answers":["o2"],"why":"正答は『僧帽筋下部線維―上方回旋』です。肩甲骨の上方回旋では僧帽筋上部・下部線維と前鋸筋が協調し、フォースカップルを形成します。上肢挙上時に肩甲骨関節窩を上向きに回すため重要です。","option_explanations":{"o1":"僧帽筋上部線維は主に肩甲骨挙上と上方回旋に寄与する。肩甲骨外転（前方突出）の主働筋は前鋸筋。","o2":"正しい。僧帽筋下部線維は肩甲骨下制に加え、前鋸筋・僧帽筋上部と協働して上方回旋に寄与する。","o3":"菱形筋は主に肩甲骨内転（後退）・下方回旋に作用し、下制が主作用ではない。","o4":"前鋸筋は肩甲骨外転と上方回旋に作用する。","o5":"小胸筋は肩甲骨を前傾・下制・下方回旋方向へ作用させ、挙上が主作用ではない。"},"related":"肩甲骨上方回旋は上肢挙上の重要要素で、僧帽筋上部・下部＋前鋸筋の協調が基本です。肩甲上腕リズムとセットで理解します。","tip":"上方回旋の3者＝僧帽筋上部・僧帽筋下部・前鋸筋。","glossary":[{"term":"フォースカップル","desc":"複数の筋が別方向に力を出しながら協調し、1つの回旋運動を生み出す仕組み。"},{"term":"上方回旋","desc":"肩甲骨の下角が外上方へ動き、関節窩が上向きになる運動。"},{"term":"前鋸筋","desc":"肩甲骨外転と上方回旋に重要な筋。翼状肩甲の関連筋としても有名。"}],"official_answers":[2],"problemImage":null,"problemImageCaption":null,"exam_links":["前鋸筋は長胸神経支配。長胸神経障害では翼状肩甲がみられる。","上肢挙上では肩甲上腕リズムと肩甲骨上方回旋を関連づけて覚える。"]},{"id":"60B70","source":"第60回・午後70（出題内容をもとに学習用再構成）","source_session":"午後","source_no":70,"subject":"運動学","domain":"四肢・体幹の運動","topic":"膝関節","concept":"膝屈曲伸展","secondary":["膝関節","スクリューホーム運動","前十字靱帯","関節包内運動"],"question":"膝関節の運動学について正しいのはどれか。","options":[{"id":"o1","text":"膝関節伸展終末では脛骨は大腿骨に対して内旋する"},{"id":"o2","text":"前十字靱帯は脛骨の後方移動を主に制動する"},{"id":"o3","text":"開放運動連鎖の膝伸展では脛骨は後方へ滑る"},{"id":"o4","text":"膝蓋骨は膝伸展で遠位方向へ移動する"},{"id":"o5","text":"開放運動連鎖の膝伸展終末では脛骨外旋が起こる"}],"answers":["o5"],"why":"正答は『開放運動連鎖の膝伸展終末では脛骨外旋が起こる』です。これはスクリューホーム運動の一部で、終末伸展で膝を安定させます。","option_explanations":{"o1":"開放運動連鎖では終末伸展で脛骨外旋が起こる。","o2":"前十字靱帯は脛骨の前方移動などを制動する。","o3":"開放運動連鎖の伸展では関節面形状に従い脛骨は前方へ滑る。","o4":"膝蓋骨は膝伸展で近位方向へ移動する。","o5":"正しい。終末伸展で脛骨外旋が起こる。"},"related":"スクリューホーム運動は開放運動連鎖では脛骨外旋、閉鎖運動連鎖では大腿骨内旋として表現されます。膝の靱帯機能と合わせて理解します。","tip":"膝伸展ロック：開放連鎖＝脛骨外旋。","glossary":[{"term":"スクリューホーム運動","desc":"膝関節終末伸展で起こる回旋運動。膝の安定化に関与する。"},{"term":"前十字靱帯","desc":"脛骨の前方移動や過伸展などを制動する重要な靱帯。"}],"official_answers":[5],"problemImage":null,"problemImageCaption":null,"exam_links":["前十字靱帯損傷では前方引き出しテストやラックマンテスト（Lachman test）が関連する。","膝蓋大腿関節の動きも膝屈伸と関連づける。"]},{"id":"60B71","source":"第60回・午後71（出題内容をもとに学習用再構成）","source_session":"午後","source_no":71,"subject":"運動学","domain":"四肢・体幹の運動","topic":"体幹","concept":"脊柱運動","secondary":["脊柱","前縦靱帯","後縦靱帯","伸展制動"],"question":"脊柱伸展を主に制限する靱帯はどれか。","options":[{"id":"o1","text":"黄色靱帯"},{"id":"o2","text":"棘上靱帯"},{"id":"o3","text":"前縦靱帯"},{"id":"o4","text":"棘間靱帯"},{"id":"o5","text":"後縦靱帯"}],"answers":["o3"],"why":"正答は前縦靱帯です。前縦靱帯は椎体前面を縦走し、脊柱の過伸展を制限します。","option_explanations":{"o1":"黄色靱帯は椎弓間を連結し、主に屈曲時に伸張される。","o2":"棘上靱帯は棘突起先端を連結し、屈曲制限に関与する。","o3":"正しい。前縦靱帯は脊柱伸展を制限する。","o4":"棘間靱帯は棘突起間にあり、屈曲で緊張する。","o5":"後縦靱帯は椎体後面を走り、屈曲制限に関与する。"},"related":"脊柱靱帯は『前縦＝伸展を止める』『後縦・棘間・棘上・黄色＝屈曲で伸張』という方向性で整理すると覚えやすいです。","tip":"前縦靱帯だけ前面にあり、伸展で張る。","glossary":[{"term":"前縦靱帯","desc":"椎体前面を縦走し、脊柱過伸展を制限する靱帯。"}],"official_answers":[3],"problemImage":null,"problemImageCaption":null,"exam_links":["頸椎・腰椎の前弯、胸椎の後弯と脊柱運動を関連づける。","椎間板と靱帯の役割を区別する。"]},{"id":"60B72","source":"第60回・午後72（出題内容をもとに学習用再構成）","source_session":"午後","source_no":72,"subject":"運動学","domain":"四肢・体幹の運動","topic":"呼吸運動","concept":"胸郭運動","secondary":["努力性呼気","腹筋群","内肋間筋","横隔膜"],"question":"努力性呼気で働く筋として最も適切なのはどれか。","options":[{"id":"o1","text":"横隔膜"},{"id":"o2","text":"外肋間筋"},{"id":"o3","text":"腹筋群"},{"id":"o4","text":"胸鎖乳突筋"},{"id":"o5","text":"前斜角筋"}],"answers":["o3"],"why":"正答は腹筋群です。安静呼気は主に肺・胸郭の弾性収縮で起こりますが、努力性呼気では腹筋群や内肋間筋などが能動的に働きます。","option_explanations":{"o1":"横隔膜は主要な吸気筋。","o2":"外肋間筋は主に吸気に作用する。","o3":"正しい。腹直筋・腹斜筋・腹横筋などは努力性呼気に関与する。","o4":"胸鎖乳突筋は吸気補助筋として働く。","o5":"前斜角筋も吸気補助筋。"},"related":"呼吸筋は『安静吸気＝横隔膜中心』『安静呼気＝受動』『努力性呼気＝腹筋群・内肋間筋』で整理します。","tip":"努力性呼気＝腹筋群＋内肋間筋。","glossary":[{"term":"努力性呼気","desc":"運動時や強い呼出時に呼気筋を能動的に使う呼気。"},{"term":"呼吸補助筋","desc":"換気要求増大時に主呼吸筋を補助する筋。"}],"official_answers":[3],"problemImage":null,"problemImageCaption":null,"exam_links":["慢性閉塞性肺疾患（chronic obstructive pulmonary disease：COPD）などでは呼吸補助筋の過活動がみられることがある。","横隔膜は横隔神経支配で、頸髄C3〜C5由来。"]},{"id":"60B73","source":"第60回・午後73（出題内容をもとに学習用再構成）","source_session":"午後","source_no":73,"subject":"運動学","domain":"四肢・体幹の運動","topic":"肘・前腕","concept":"肘屈曲伸展","secondary":["上腕二頭筋","前腕回外","肘屈曲","上腕筋"],"question":"上肢の筋と運動の組合せとして正しいのはどれか。","options":[{"id":"o1","text":"上腕三頭筋 ― 前腕回外"},{"id":"o2","text":"上腕二頭筋 ― 前腕回外"},{"id":"o3","text":"円回内筋 ― 前腕回外"},{"id":"o4","text":"上腕筋 ― 肘伸展"},{"id":"o5","text":"腕橈骨筋 ― 肩関節外転"}],"answers":["o2"],"why":"正答は『上腕二頭筋―前腕回外』です。上腕二頭筋は肘屈曲に加え、とくに肘屈曲位で強力な前腕回外筋として働きます。","option_explanations":{"o1":"上腕三頭筋の主作用は肘伸展。","o2":"正しい。上腕二頭筋は前腕回外に強く作用する。","o3":"円回内筋は前腕回内に作用する。","o4":"上腕筋は主要な肘屈筋。","o5":"腕橈骨筋は肘屈曲に関与する。"},"related":"肘屈曲筋では上腕筋・上腕二頭筋・腕橈骨筋の違いを整理します。前腕回外は上腕二頭筋と回外筋、回内は円回内筋と方形回内筋が中心です。","tip":"上腕二頭筋＝肘屈曲＋前腕回外。","glossary":[{"term":"回外","desc":"前腕を解剖学的肢位で手掌が前方を向く方向へ回す運動。"},{"term":"上腕筋","desc":"前腕の回内外位にかかわらず強く働く肘屈筋。"}],"official_answers":[2],"problemImage":null,"problemImageCaption":null,"exam_links":["上腕二頭筋の支配神経は筋皮神経。","前腕回内外の関節は近位・遠位橈尺関節。"]},{"id":"60B74","source":"第60回・午後74（出題内容をもとに再構成）","source_session":"午後","source_no":74,"subject":"運動学","domain":"運動制御・運動学習","topic":"運動学習","concept":"運動学習の原則","secondary":["小脳","手続き記憶","フィードフォワード"],"question":"運動学習について正しい記述はどれか。","options":[{"id":"o1","text":"運動学習の過程には小脳が関与する"},{"id":"o2","text":"学習初期から手続き記憶のみで運動が成立する"},{"id":"o3","text":"覚醒レベルが高いほどパフォーマンスは常に向上する"},{"id":"o4","text":"熟練するとフィードバック制御への依存が増える"},{"id":"o5","text":"練習量と達成度の学習曲線は典型的に逆U字型である"}],"answers":["o1"],"why":"正答は『運動学習の過程には小脳が関与する』です。小脳は運動誤差の検出・修正や適応学習に重要で、反復練習による運動パターンの更新に関与します。運動学習は認知的な理解から始まり、練習によって自動化が進みます。","option_explanations":{"o1":"正しい。小脳は誤差学習や運動適応、タイミング調整などに重要。","o2":"学習初期は課題理解や注意など意識的処理の比重が高く、反復により手続き化・自動化が進む。","o3":"覚醒レベルとパフォーマンスは単純比例ではなく、課題によって適度な覚醒水準が異なる。","o4":"熟練すると予測的なフィードフォワード制御が発達し、逐次的フィードバックへの依存は相対的に減る。","o5":"学習曲線は一般に練習量に応じて改善し、その後伸びが緩やかになる形などで表され、逆U字は覚醒とパフォーマンスの関係で用いられる。"},"related":"運動学習では、結果の知識（knowledge of results：KR）と遂行の知識（knowledge of performance：KP）、集中練習と分散練習、ブロック練習とランダム練習、保持と転移も頻出です。KRは『結果がどうだったか』、KPは『動作のやり方がどうだったか』という違いです。","tip":"逆U字＝覚醒とパフォーマンス。運動学習の誤差修正＝小脳。","glossary":[{"term":"フィードフォワード制御","desc":"運動前・運動中の予測に基づいてあらかじめ調整する制御。熟練で重要性が増す。"},{"term":"フィードバック制御","desc":"実際の運動結果を感覚情報として受け取り、修正に利用する制御。"},{"term":"逆U字","desc":"覚醒水準とパフォーマンスの関係を説明する概念。高すぎても低すぎても成績は下がる。"},{"term":"結果の知識","desc":"knowledge of results（KR）。課題の結果に関するフィードバック。例：目標から何cmずれたか。"},{"term":"遂行の知識","desc":"knowledge of performance（KP）。運動の方法やフォームに関するフィードバック。"}],"official_answers":[1],"problemImage":null,"problemImageCaption":null,"exam_links":["結果の知識（KR）は結果、遂行の知識（KP）は動作方法に関するフィードバック。","保持テスト・転移テストは『その場でできた』のではなく学習が成立したかを見る指標。"]}];
+const ANALYTICS = {"解剖学":[{"id":"upper","label":"上肢運動器","description":"上肢の骨・関節と筋をまとめて確認","rules":[{"domain":"骨格系","topics":["上肢の骨・関節"]},{"domain":"筋系","topics":["上肢の筋"]}],"subgroups":[{"domain":"骨格系","topic":"上肢の骨・関節","label":"上肢の骨・関節"},{"domain":"筋系","topic":"上肢の筋","label":"上肢の筋"}]},{"id":"lower","label":"下肢運動器","description":"下肢の骨・関節と筋をまとめて確認","rules":[{"domain":"骨格系","topics":["下肢の骨・関節"]},{"domain":"筋系","topics":["下肢の筋"]}],"subgroups":[{"domain":"骨格系","topic":"下肢の骨・関節","label":"下肢の骨・関節"},{"domain":"筋系","topic":"下肢の筋","label":"下肢の筋"}]},{"id":"trunk","label":"体幹・頭頸部","description":"体幹・胸郭・頭蓋と体幹筋・呼吸筋","rules":[{"domain":"骨格系","topics":["体幹の骨・関節"]},{"domain":"筋系","topics":["体幹・呼吸筋"]}],"subgroups":[{"domain":"骨格系","topic":"体幹の骨・関節","label":"体幹の骨・関節"},{"domain":"筋系","topic":"体幹・呼吸筋","label":"体幹・呼吸筋"}]},{"id":"cns","label":"中枢神経・伝導路","description":"中枢神経の構造と主要伝導路","rules":[{"domain":"神経系","topics":["中枢神経","伝導路"]}],"subgroups":[{"domain":"神経系","topic":"中枢神経","label":"中枢神経"},{"domain":"神経系","topic":"伝導路","label":"伝導路"}]},{"id":"pns","label":"脳神経・末梢神経","description":"脳神経、上肢・下肢末梢神経、自律神経","rules":[{"domain":"神経系","topics":["脳神経","上肢末梢神経","下肢末梢神経","自律神経の解剖"]}],"subgroups":[{"domain":"神経系","topic":"脳神経","label":"脳神経"},{"domain":"神経系","topic":"上肢末梢神経","label":"上肢末梢神経"},{"domain":"神経系","topic":"下肢末梢神経","label":"下肢末梢神経"},{"domain":"神経系","topic":"自律神経の解剖","label":"自律神経の解剖"}]},{"id":"vascular","label":"心臓・血管・リンパ","description":"心臓、主要血管、リンパ系","rules":[{"domain":"脈管系","topics":["心臓","血管","リンパ"]}],"subgroups":[{"domain":"脈管系","topic":"心臓","label":"心臓"},{"domain":"脈管系","topic":"血管","label":"血管"},{"domain":"脈管系","topic":"リンパ","label":"リンパ"}]},{"id":"viscera","label":"内臓・感覚器","description":"呼吸・消化・泌尿生殖・内分泌器官と感覚器","rules":[{"domain":"内臓諸器官","topics":["呼吸器","消化器","泌尿・生殖器","内分泌腺"]},{"domain":"感覚器","topics":["特殊感覚","体性感覚器"]}],"subgroups":[{"domain":"内臓諸器官","topic":"呼吸器","label":"呼吸器"},{"domain":"内臓諸器官","topic":"消化器","label":"消化器"},{"domain":"内臓諸器官","topic":"泌尿・生殖器","label":"泌尿・生殖器"},{"domain":"内臓諸器官","topic":"内分泌腺","label":"内分泌腺"},{"domain":"感覚器","topic":"特殊感覚","label":"特殊感覚"},{"domain":"感覚器","topic":"体性感覚器","label":"体性感覚器"}]},{"id":"basic","label":"組織・体表・基礎","description":"細胞・組織、体表解剖、基礎・発生、応用解剖","rules":[{"domain":"総論","topics":["基礎・発生"]},{"domain":"体表解剖","topics":["ランドマーク"]},{"domain":"応用解剖","topics":["機能・局所・断層"]},{"domain":"組織","topics":["細胞・組織"]}],"subgroups":[{"domain":"総論","topic":"基礎・発生","label":"基礎・発生"},{"domain":"体表解剖","topic":"ランドマーク","label":"ランドマーク"},{"domain":"応用解剖","topic":"機能・局所・断層","label":"機能・局所・断層"},{"domain":"組織","topic":"細胞・組織","label":"細胞・組織"}]}],"生理学":[{"id":"cell_muscle","label":"細胞・筋","description":"細胞生理と筋線維・筋収縮","rules":[{"domain":"総論","topics":["細胞生理"]},{"domain":"筋","topics":["筋線維・収縮"]}],"subgroups":[{"domain":"総論","topic":"細胞生理","label":"細胞生理"},{"domain":"筋","topic":"筋線維・収縮","label":"筋線維・収縮"}]},{"id":"neuro_sense","label":"神経・感覚","description":"神経伝導、反射、中枢機能、感覚・認知・言語","rules":[{"domain":"神経","topics":["興奮・伝導","シナプス・神経筋接合部","反射","中枢・末梢神経機能"]},{"domain":"感覚・認知","topics":["体性感覚","特殊感覚","認知"]},{"domain":"言語・発声構音","topics":["言語機能"]}],"subgroups":[{"domain":"神経","topic":"興奮・伝導","label":"興奮・伝導"},{"domain":"神経","topic":"シナプス・神経筋接合部","label":"シナプス・神経筋接合部"},{"domain":"神経","topic":"反射","label":"反射"},{"domain":"神経","topic":"中枢・末梢神経機能","label":"中枢・末梢神経機能"},{"domain":"感覚・認知","topic":"体性感覚","label":"体性感覚"},{"domain":"感覚・認知","topic":"特殊感覚","label":"特殊感覚"},{"domain":"感覚・認知","topic":"認知","label":"認知"},{"domain":"言語・発声構音","topic":"言語機能","label":"言語機能"}]},{"id":"autonomic_motor","label":"自律神経・運動","description":"自律神経機能と運動生理","rules":[{"domain":"自律神経","topics":["自律神経機能"]},{"domain":"運動","topics":["運動生理"]}],"subgroups":[{"domain":"自律神経","topic":"自律神経機能","label":"自律神経機能"},{"domain":"運動","topic":"運動生理","label":"運動生理"}]},{"id":"resp","label":"呼吸","description":"換気、ガス交換・運搬、呼吸調節","rules":[{"domain":"呼吸","topics":["換気","ガス交換・運搬","呼吸調節"]}],"subgroups":[{"domain":"呼吸","topic":"換気","label":"換気"},{"domain":"呼吸","topic":"ガス交換・運搬","label":"ガス交換・運搬"},{"domain":"呼吸","topic":"呼吸調節","label":"呼吸調節"}]},{"id":"circ_blood","label":"循環・血液","description":"心機能、循環調節、血液・凝固・免疫","rules":[{"domain":"循環","topics":["心機能","刺激伝導・心電図","循環調節"]},{"domain":"血液・免疫","topics":["血液","凝固・免疫"]}],"subgroups":[{"domain":"循環","topic":"心機能","label":"心機能"},{"domain":"循環","topic":"刺激伝導・心電図","label":"刺激伝導・心電図"},{"domain":"循環","topic":"循環調節","label":"循環調節"},{"domain":"血液・免疫","topic":"血液","label":"血液"},{"domain":"血液・免疫","topic":"凝固・免疫","label":"凝固・免疫"}]},{"id":"digest","label":"嚥下・消化・排便","description":"摂食嚥下、消化吸収、排便機構","rules":[{"domain":"咀嚼・嚥下・消化・吸収","topics":["摂食嚥下","消化吸収"]},{"domain":"排便","topics":["排便機構"]}],"subgroups":[{"domain":"咀嚼・嚥下・消化・吸収","topic":"摂食嚥下","label":"摂食嚥下"},{"domain":"咀嚼・嚥下・消化・吸収","topic":"消化吸収","label":"消化吸収"},{"domain":"排便","topic":"排便機構","label":"排便機構"}]},{"id":"renal","label":"腎・排尿・体液","description":"腎機能、体液・電解質、排尿","rules":[{"domain":"腎・排尿","topics":["腎機能","排尿"]}],"subgroups":[{"domain":"腎・排尿","topic":"腎機能","label":"腎機能"},{"domain":"腎・排尿","topic":"排尿","label":"排尿"}]},{"id":"endo","label":"内分泌・代謝など","description":"内分泌、代謝、体温、生殖、加齢変化","rules":[{"domain":"内分泌・栄養・代謝","topics":["ホルモン","代謝"]},{"domain":"体温調節","topics":["体温"]},{"domain":"生殖","topics":["生殖生理"]},{"domain":"老化","topics":["加齢変化"]}],"subgroups":[{"domain":"内分泌・栄養・代謝","topic":"ホルモン","label":"ホルモン"},{"domain":"内分泌・栄養・代謝","topic":"代謝","label":"代謝"},{"domain":"体温調節","topic":"体温","label":"体温"},{"domain":"生殖","topic":"生殖生理","label":"生殖生理"},{"domain":"老化","topic":"加齢変化","label":"加齢変化"}]}],"運動学":[{"id":"basics","label":"力学・運動基礎","description":"力学、機能解剖、運動の神経機構・エネルギー","rules":[{"domain":"総論","topics":["力学の基礎","運動器の機能解剖","運動の神経機構","運動とエネルギー","運動と呼吸循環"]}],"subgroups":[{"domain":"総論","topic":"力学の基礎","label":"力学の基礎"},{"domain":"総論","topic":"運動器の機能解剖","label":"運動器の機能解剖"},{"domain":"総論","topic":"運動の神経機構","label":"運動の神経機構"},{"domain":"総論","topic":"運動とエネルギー","label":"運動とエネルギー"},{"domain":"総論","topic":"運動と呼吸循環","label":"運動と呼吸循環"}]},{"id":"upper","label":"上肢","description":"肩甲帯・肩、肘・前腕、手関節・手指","rules":[{"domain":"四肢・体幹の運動","topics":["肩甲帯・肩","肘・前腕","手関節・手指"]}],"subgroups":[{"domain":"四肢・体幹の運動","topic":"肩甲帯・肩","label":"肩甲帯・肩"},{"domain":"四肢・体幹の運動","topic":"肘・前腕","label":"肘・前腕"},{"domain":"四肢・体幹の運動","topic":"手関節・手指","label":"手関節・手指"}]},{"id":"lower","label":"下肢","description":"股関節、膝関節、足関節・足部","rules":[{"domain":"四肢・体幹の運動","topics":["股関節","膝関節","足関節・足部"]}],"subgroups":[{"domain":"四肢・体幹の運動","topic":"股関節","label":"股関節"},{"domain":"四肢・体幹の運動","topic":"膝関節","label":"膝関節"},{"domain":"四肢・体幹の運動","topic":"足関節・足部","label":"足関節・足部"}]},{"id":"trunk","label":"体幹・頭頸部","description":"顔面・頭頸部、体幹、呼吸運動","rules":[{"domain":"四肢・体幹の運動","topics":["顔面・頭頸部","体幹","呼吸運動"]}],"subgroups":[{"domain":"四肢・体幹の運動","topic":"顔面・頭頸部","label":"顔面・頭頸部"},{"domain":"四肢・体幹の運動","topic":"体幹","label":"体幹"},{"domain":"四肢・体幹の運動","topic":"呼吸運動","label":"呼吸運動"}]},{"id":"actions","label":"基本動作・動作解析","description":"寝返り、起き上がり、立ち上がり、移乗など","rules":[{"domain":"動作解析","topics":["基本動作","階段・その他動作"]}],"subgroups":[{"domain":"動作解析","topic":"基本動作","label":"基本動作"},{"domain":"動作解析","topic":"階段・その他動作","label":"階段・その他動作"}]},{"id":"posture","label":"姿勢・バランス","description":"支持基底面、重心、安定性、姿勢反応","rules":[{"domain":"姿勢","topics":["姿勢制御"]}],"subgroups":[{"domain":"姿勢","topic":"姿勢制御","label":"姿勢制御"}]},{"id":"gait","label":"歩行","description":"歩行周期、時空間因子、運動学・運動力学","rules":[{"domain":"歩行","topics":["歩行周期","歩行の時空間因子","歩行の運動学・運動力学"]}],"subgroups":[{"domain":"歩行","topic":"歩行周期","label":"歩行周期"},{"domain":"歩行","topic":"歩行の時空間因子","label":"歩行の時空間因子"},{"domain":"歩行","topic":"歩行の運動学・運動力学","label":"歩行の運動学・運動力学"}]},{"id":"motor_learning","label":"運動制御・運動学習","description":"フィードバック、感覚統合、練習方法、保持・転移","rules":[{"domain":"運動制御・運動学習","topics":["運動制御","運動学習"]}],"subgroups":[{"domain":"運動制御・運動学習","topic":"運動制御","label":"運動制御"},{"domain":"運動制御・運動学習","topic":"運動学習","label":"運動学習"}]}]};
+const KEY = 'ptot_v15';
+let st = JSON.parse(localStorage.getItem(KEY) || '{"attempts":[],"diagnosed":false,"lookup":[],"activeDiag":null}');
+if(!Array.isArray(st.attempts)) st.attempts=[];
+if(typeof st.diagnosed!=='boolean') st.diagnosed=false;
+if(!Array.isArray(st.lookup)) st.lookup=[];
+if(!st.activeDiag || !Array.isArray(st.activeDiag.ids)) st.activeDiag=null;
+let ses = null;
+const S = document.getElementById('screen');
+const NAV = document.getElementById('nav');
+function save(){ localStorage.setItem(KEY, JSON.stringify(st)); updateLookupNav(); }
+function scrollTopNow(){ requestAnimationFrame(()=>window.scrollTo({top:0,left:0,behavior:'auto'})); }
+
+function problemFigureHtml(q){
+  if(q.problemImage){
+    return `<div class="figure"><img src="${q.problemImage}" alt="${q.problemImageCaption||'問題図'}" style="display:block;width:100%;height:auto;border-radius:10px"><div class="small muted" style="text-align:center;margin-top:6px">${q.problemImageCaption||''}</div></div>`;
+  }
+  if(q.officialFigureUrl){
+    return `<div class="figure" style="padding:12px">
+      <div class="small muted" style="margin-bottom:8px">${q.problemImageCaption||'公式問題図'}</div>
+      <a class="btn secondary" style="display:block;text-align:center;text-decoration:none" href="${q.officialFigureUrl}" target="_blank" rel="noopener">公式問題図を開く</a>
+      <div class="small muted" style="margin-top:7px">厚生労働省の公式PDFを別タブで開きます。</div>
+    </div>`;
+  }
+  return '';
+}
+
+
+let deferredInstallPrompt=null;
+function isStandaloneApp(){
+  return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone===true;
+}
+function isIOSDevice(){
+  return /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform==='MacIntel' && navigator.maxTouchPoints>1);
+}
+function isSafariBrowser(){
+  const ua=navigator.userAgent.toLowerCase();
+  return ua.includes('safari') && !ua.includes('crios') && !ua.includes('fxios') && !ua.includes('edgios');
+}
+window.addEventListener('beforeinstallprompt',e=>{
+  e.preventDefault();
+  deferredInstallPrompt=e;
+  setTimeout(renderInstallCard,0);
+});
+window.addEventListener('appinstalled',()=>{
+  deferredInstallPrompt=null;
+  setTimeout(renderInstallCard,0);
+});
+async function installPWA(){
+  if(!deferredInstallPrompt)return;
+  deferredInstallPrompt.prompt();
+  try{ await deferredInstallPrompt.userChoice; }catch(e){}
+  deferredInstallPrompt=null;
+  renderInstallCard();
+}
+function dismissInstallCard(){
+  localStorage.setItem('ptot_install_dismissed',String(Date.now()));
+  const el=document.getElementById('installCard'); if(el)el.classList.add('hidden');
+}
+function renderInstallCard(){
+  const el=document.getElementById('installCard'); if(!el)return;
+  if(isStandaloneApp()){ el.classList.add('hidden'); return; }
+  const dismissed=Number(localStorage.getItem('ptot_install_dismissed')||0);
+  if(dismissed && Date.now()-dismissed<3*86400000){el.classList.add('hidden');return;}
+  const title=el.querySelector('[data-install-title]');
+  const body=el.querySelector('[data-install-body]');
+  const action=el.querySelector('[data-install-action]');
+  el.classList.remove('hidden');
+  if(deferredInstallPrompt){
+    title.textContent='スマホにインストールできます';
+    body.textContent='インストール後はホーム画面のアイコンから、通常のアプリのように起動できます。';
+    action.style.display='';
+    action.textContent='アプリをインストール';
+    action.onclick=installPWA;
+  }else if(isIOSDevice()){
+    title.textContent='ホーム画面に追加できます';
+    body.innerHTML=isSafariBrowser()
+      ? 'Safariの共有ボタン <b>□↑</b> → <b>「ホーム画面に追加」</b> → <b>「追加」</b> の順に操作してください。'
+      : 'iPhoneではSafariでこのページを開き、共有 →「ホーム画面に追加」を選んでください。';
+    action.style.display='none';
+  }else{
+    title.textContent='アプリとして使えます';
+    body.textContent='ブラウザのメニューに「インストール」または「ホーム画面に追加」が表示される場合は、それを選択してください。';
+    action.style.display='none';
+  }
+}
+function appRuntimeBadge(){
+  return isStandaloneApp()
+    ? '<span class="app-mode-badge">✓ アプリ起動中</span>'
+    : '<span class="browser-mode-badge">ブラウザ表示</span>';
+}
+
+function activeDiagProgress(){
+  if(!st.activeDiag)return null;
+  const total=st.activeDiag.ids.length,done=Math.min(st.activeDiag.i||0,total);
+  return {done,total,pct:total?Math.round(done/total*100):0};
+}
+function diagResumeHtml(){
+  const p=activeDiagProgress(); if(!p)return '';
+  return `<div class="resume-card">
+    <div class="resume-head"><div><b>診断テストの続きがあります</b><div class="small muted">${p.done} / ${p.total}問 回答済み</div></div><span class="badge-warn">${p.pct}%</span></div>
+    <div class="progress" style="margin-top:9px"><div style="width:${p.pct}%"></div></div>
+    <div class="resume-actions">
+      <button class="btn" onclick="resumeDiagnosis()">続きから再開</button>
+      <button class="btn secondary" onclick="restartDiagnosis()">最初からやり直す</button>
+    </div>
+  </div>`;
+}
+
+function lookupKey(term,qid){ return qid+'::'+term; }
+function pendingLookup(){ return st.lookup.filter(x=>!x.done); }
+function updateLookupNav(){
+  const el=document.getElementById('lookupNavCount'); if(!el)return;
+  const n=pendingLookup().length; el.textContent=n?String(n):''; el.style.display=n?'inline-grid':'none';
+}
+function lookupSaved(term,qid){ return st.lookup.some(x=>x.key===lookupKey(term,qid)&&!x.done); }
+function addLookup(term,qid,el){
+  const key=lookupKey(term,qid),found=st.lookup.find(x=>x.key===key);
+  if(found){ found.done=false; found.added=new Date().toISOString(); }
+  else st.lookup.push({key,term,qid,added:new Date().toISOString(),done:false});
+  save();
+  if(el){el.textContent='✓ あとで調べるに保存済み';el.classList.add('saved');}
+}
+function toggleLookupDone(key){
+  const x=st.lookup.find(v=>v.key===key); if(!x)return; x.done=!x.done; save(); lookupPage();
+}
+function removeLookup(key){ st.lookup=st.lookup.filter(x=>x.key!==key); save(); lookupPage(); }
+function lookupButton(term,qid){
+  const enc=encodeURIComponent(term),saved=lookupSaved(term,qid);
+  return `<button class="lookup-add ${saved?'saved':''}" onclick="addLookup(decodeURIComponent('${enc}'),'${qid}',this)">${saved?'✓ あとで調べるに保存済み':'＋ あとで調べる'}</button>`;
+}
+function qBy(id){ return Q.find(q => q.id===id); }
+function shuffle(a){ a=[...a]; for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
+function esc(s){ return String(s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+function dayKey(ts){ const d=new Date(ts); return `${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()}`; }
+function daysBetween(a,b){ return Math.floor((new Date(b)-new Date(a))/86400000); }
+function weight(a){ if(!a.correct) return a.conf==='high'?5:a.conf==='mid'?4:3; return a.conf==='low'?2.5:a.conf==='mid'?1.5:0; }
+function attemptMastery(a){ if(a.correct) return a.conf==='high'?100:a.conf==='mid'?82:65; return a.conf==='high'?5:a.conf==='mid'?20:35; }
+function misconceptionStatus(id, cutoff=null){
+  const aa=st.attempts.filter(a=>a.id===id&&(!cutoff||new Date(a.ts)<=new Date(cutoff))).sort((a,b)=>new Date(a.ts)-new Date(b.ts));
+  let lastBad=-1; aa.forEach((a,i)=>{if(!a.correct&&a.conf==='high')lastBad=i;});
+  if(lastBad<0) return {active:false,confirmations:0};
+  let confirmations=0;
+  for(let i=lastBad+1;i<aa.length;i++){
+    const a=aa[i];
+    if(a.correct&&a.conf==='high') confirmations++;
+    else if(!a.correct&&a.conf==='high'){ confirmations=0; lastBad=i; }
+  }
+  return {active:confirmations<2,confirmations:Math.min(confirmations,2)};
+}
+function questionMastery(id, cutoff=null){
+  const aa=st.attempts.filter(a=>a.id===id&&(!cutoff||new Date(a.ts)<=new Date(cutoff))).sort((a,b)=>new Date(b.ts)-new Date(a.ts));
+  if(!aa.length) return null;
+  const ww=[1,.65,.42,.27,.17], recent=aa.slice(0,5); let n=0,d=0;
+  recent.forEach((a,i)=>{n+=attemptMastery(a)*ww[i];d+=ww[i];});
+  let v=n/d; if(misconceptionStatus(id,cutoff).active) v=Math.min(v,55); return Math.round(v);
+}
+function profile(id){
+  const aa=st.attempts.filter(a=>a.id===id);
+  if(!aa.length) return {seen:0,score:1.5,due:null,sameDay:false,misconception:false,priority:1.5};
+  const rev=[...aa].sort((a,b)=>new Date(b.ts)-new Date(a.ts)); let score=0,f=1;
+  rev.slice(0,6).forEach(a=>{score+=weight(a)*f;f*=.6;});
+  const last=rev[0],today=dayKey(new Date()),todayAttempts=aa.filter(a=>dayKey(a.ts)===today),lastToday=todayAttempts.length?todayAttempts[todayAttempts.length-1]:null;
+  const sameDay=!!(lastToday&&(!lastToday.correct||lastToday.conf==='low'));
+  const hadErrorOrLowToday=todayAttempts.some(a=>!a.correct||a.conf==='low');
+  const mis=misconceptionStatus(id); let days=5;
+  if(mis.active) days=mis.confirmations===0?1:2;
+  else if(hadErrorOrLowToday||!last.correct||last.conf==='low') days=1;
+  else if(last.conf==='mid') days=3;
+  else { let streak=0; for(const a of rev){ if(a.correct&&a.conf==='high')streak++; else break; } days=streak>=3?21:streak===2?10:5; }
+  return {seen:aa.length,score,due:new Date(new Date(last.ts).getTime()+days*86400000),sameDay,misconception:mis.active,confirmations:mis.confirmations,priority:score+(mis.active?5:0)+(sameDay?4:0)};
+}
+function dueIds(){
+  const now=new Date();
+  return Q.map(q=>({id:q.id,p:profile(q.id)})).filter(x=>x.p.sameDay||(x.p.due&&x.p.due<=now)).sort((a,b)=>{
+    if(a.p.misconception!==b.p.misconception) return a.p.misconception?-1:1;
+    if(a.p.sameDay!==b.p.sameDay) return a.p.sameDay?-1:1;
+    return b.p.priority-a.p.priority;
+  }).map(x=>x.id);
+}
+function conceptScores(){
+  const m={};
+  Q.forEach(q=>{const p=profile(q.id);if(!p.seen)return;const k=[q.subject,q.domain,q.topic,q.concept].join(' > ');if(!m[k])m[k]={parts:[q.subject,q.domain,q.topic,q.concept],v:0,n:0,mis:false};m[k].v+=p.priority;m[k].n++;m[k].mis ||= p.misconception;});
+  return Object.entries(m).map(([key,x])=>({key,...x,av:x.v/x.n})).sort((a,b)=>b.av-a.av);
+}
+function related(key){const parts=key.split(' > ');return Q.filter(q=>[q.subject,q.domain,q.topic,q.concept].every((v,i)=>v===parts[i])).map(q=>q.id);}
+function lvl(x){return x.mis?'重点復習':x.av>=4?'高':x.av>=2?'中':'低';}
+function lvlc(x){return x.mis?'high':x.av>=4?'high':x.av>=2?'mid':'';}
+function diagnosisRuns(){
+  const groups={}; st.attempts.filter(a=>a.type==='diag').forEach(a=>{const k=a.sessionId||`legacy-${dayKey(a.ts)}`;groups[k]??=[];groups[k].push(a);});
+  return Object.entries(groups).map(([id,aa])=>({id,start:new Date(Math.min(...aa.map(a=>new Date(a.ts).getTime()))),end:new Date(Math.max(...aa.map(a=>new Date(a.ts).getTime()))),count:aa.length})).sort((a,b)=>a.end-b.end);
+}
+function diagnosisInfo(){
+  const runs=diagnosisRuns(); if(!runs.length)return {last:null,previous:null,recommended:true,reason:'初回診断が必要です',attemptsSince:st.attempts.length};
+  const last=runs[runs.length-1],previous=runs.length>1?runs[runs.length-2]:null,days=daysBetween(last.end,new Date()),attemptsSince=st.attempts.filter(a=>new Date(a.ts)>last.end&&a.type!=='diag').length;
+  const recommended=days>=14||(days>=7&&attemptsSince>=100); const reason=days>=14?'前回診断から14日以上経過':(days>=7&&attemptsSince>=100?'前回診断後に100問以上演習':'');
+  return {last,previous,recommended,reason,attemptsSince,days};
+}
+function chooseDiagnosisIds(){
+  const target=Math.min(40,Q.length),exposure={};Q.forEach(q=>exposure[q.id]=st.attempts.filter(a=>a.id===q.id&&a.type==='diag').length);
+  const subjects=[...new Set(Q.map(q=>q.subject))],pools=Object.fromEntries(subjects.map(s=>[s,shuffle(Q.filter(q=>q.subject===s).sort((a,b)=>exposure[a.id]-exposure[b.id]))])),out=[];
+  while(out.length<target){let added=false;for(const s of subjects){const next=pools[s].shift();if(next){out.push(next.id);added=true;if(out.length>=target)break;}}if(!added)break;}return out;
+}
+function subjectStats(subject,cutoff=null){
+  const qs=Q.filter(q=>q.subject===subject),values=qs.map(q=>questionMastery(q.id,cutoff)).filter(v=>v!==null),attempts=st.attempts.filter(a=>qBy(a.id)?.subject===subject&&(!cutoff||new Date(a.ts)<=new Date(cutoff))).length;
+  return {value:values.length?Math.round(values.reduce((a,b)=>a+b,0)/values.length):0,seen:values.length,total:qs.length,attempts,insufficient:values.length<Math.min(3,qs.length)};
+}
+function diagnosisRecordsBySession(sessionId){
+  return st.attempts.filter(a=>a.type==='diag'&&(a.sessionId||`legacy-${dayKey(a.ts)}`)===sessionId);
+}
+function diagSubjectStats(records){
+  return [...new Set(records.map(a=>qBy(a.id)?.subject).filter(Boolean))].map(subject=>{
+    const aa=records.filter(a=>qBy(a.id)?.subject===subject),ok=aa.filter(a=>a.correct).length,total=aa.length;
+    return {subject,ok,total,pct:total?Math.round(ok/total*100):0};
+  });
+}
+function diagConfidenceStats(records){
+  const out={
+    highCorrect:0,midCorrect:0,lowCorrect:0,
+    highWrong:0,midWrong:0,lowWrong:0
+  };
+  records.forEach(a=>{
+    const side=a.correct?'Correct':'Wrong';
+    const conf=a.conf==='high'?'high':a.conf==='mid'?'mid':'low';
+    out[conf+side]++;
+  });
+  return out;
+}
+function conceptMasteryValue(key){
+  const vals=related(key).map(id=>questionMastery(id)).filter(v=>v!==null);
+  return vals.length?Math.round(vals.reduce((a,b)=>a+b,0)/vals.length):null;
+}
+function resultWeakHtml(limit=3){
+  const rows=conceptScores().slice(0,limit);
+  if(!rows.length)return '<div class="lookup-empty">まだ弱点データがありません。</div>';
+  return `<div class="result-weak-grid">${rows.map((x,i)=>{
+    const mastery=conceptMasteryValue(x.key);
+    return `<button class="result-weak-card" onclick="startTag('${x.key.replace(/'/g,"\\'")}')">
+      <div class="result-weak-top">
+        <div><span class="weak-rank">${i+1}</span><span class="result-weak-title">${esc(x.parts[3])}</span></div>
+        <span class="result-weak-score">${mastery===null?'未測定':`推定習熟度 ${mastery}/100`}</span>
+      </div>
+      <div class="result-weak-path">${x.parts.slice(0,3).map(esc).join(' › ')}</div>
+      <div class="result-weak-action">この系列を復習する →</div>
+    </button>`;
+  }).join('')}</div>`;
+}
+function previousDiagnosisFor(sessionId){
+  const runs=diagnosisRuns(),i=runs.findIndex(r=>r.id===sessionId);
+  return i>0?runs[i-1]:null;
+}
+
+function axisConfig(subject,axisId){return (ANALYTICS[subject]||[]).find(a=>a.id===axisId)||null;}
+function axisMatches(q,axis){return !!axis && axis.rules.some(r=>q.domain===r.domain&&r.topics.includes(q.topic));}
+function axisForQuestion(q){return (ANALYTICS[q.subject]||[]).find(a=>axisMatches(q,a))||null;}
+function axisQuestions(subject,axisId){const a=axisConfig(subject,axisId);return Q.filter(q=>q.subject===subject&&axisMatches(q,a));}
+function axisStats(subject,axisId,cutoff=null){
+  const qs=axisQuestions(subject,axisId),vals=qs.map(q=>questionMastery(q.id,cutoff)).filter(v=>v!==null);
+  const attempts=st.attempts.filter(x=>{const q=qBy(x.id);return q&&q.subject===subject&&axisMatches(q,axisConfig(subject,axisId))&&(!cutoff||new Date(x.ts)<=new Date(cutoff));}).length;
+  return {value:vals.length?Math.round(vals.reduce((a,b)=>a+b,0)/vals.length):null,seen:vals.length,total:qs.length,attempts,insufficient:vals.length<3};
+}
+function subgroupStats(subject,domain,topic,cutoff=null){
+  const qs=Q.filter(q=>q.subject===subject&&q.domain===domain&&q.topic===topic),vals=qs.map(q=>questionMastery(q.id,cutoff)).filter(v=>v!==null);
+  return {value:vals.length?Math.round(vals.reduce((a,b)=>a+b,0)/vals.length):null,seen:vals.length,total:qs.length};
+}
+function subgroupConcepts(subject,domain,topic){
+  return Q.filter(q=>q.subject===subject&&q.domain===domain&&q.topic===topic).map(q=>({q,mastery:questionMastery(q.id),priority:profile(q.id).priority})).sort((a,b)=>{
+    if(a.mastery===null&&b.mastery!==null)return 1;if(a.mastery!==null&&b.mastery===null)return -1;
+    if(a.mastery!==null&&b.mastery!==null&&a.mastery!==b.mastery)return a.mastery-b.mastery;
+    return b.priority-a.priority;
+  });
+}
+function axisStatusText(x){if(!x.total)return '問題未収録';if(x.value===null)return '未測定';return `推定習熟度 ${x.value} / 100${x.insufficient?'・データ少':''} ／ 回答 ${x.seen}/${x.total}問`;}
+function subjectSummaryHtml(){
+  return `<div class="subject-grid">${[...new Set(Q.map(q=>q.subject))].map(s=>{
+    const x=subjectStats(s);
+    return `<div class="subject-score">
+      <div class="name">${esc(s)}</div>
+      <div class="score-caption">推定習熟度</div>
+      <div class="scoreline"><b>${x.value}<small> / 100</small></b><div class="meter"><span style="width:${x.value}%"></span></div></div>
+      <div class="metric-note">回答した問題 ${x.seen} / ${x.total}問${x.insufficient?'・データ少':''}</div>
+    </div>`;
+  }).join('')}</div>`;
+}
+function radarSvg(subject){
+  const axes=ANALYTICS[subject]||[],info=diagnosisInfo(),prevCut=info.previous?info.previous.end:null;
+  if(axes.length<3)return '<p class="muted">レーダー表示に必要な分類がありません。</p>';
+  const cur=axes.map(a=>({...a,stat:axisStats(subject,a.id)}));
+  const prev=axes.map(a=>({...a,stat:axisStats(subject,a.id,prevCut)}));
+  const n=axes.length,cx=210,cy=165,r=102;
+  const pt=(i,val,rr=r)=>{const ang=-Math.PI/2+i*2*Math.PI/n;const rad=rr*(val/100);return [cx+rad*Math.cos(ang),cy+rad*Math.sin(ang)];};
+  const ring=frac=>Array.from({length:n},(_,i)=>pt(i,100,r*frac).join(',')).join(' ');
+  const measured=cur.filter(x=>x.stat.value!==null).length;
+
+  const sectorFills=cur.map((x,i)=>{
+    const j=(i+1)%n,a=x.stat.value,b=cur[j].stat.value;
+    if(a===null||b===null)return '';
+    const p1=pt(i,a),p2=pt(j,b);
+    return `<polygon points="${cx},${cy} ${p1[0]},${p1[1]} ${p2[0]},${p2[1]}" fill="rgba(15,118,110,.13)" stroke="none"/>`;
+  }).join('');
+
+  const currentEdges=cur.map((x,i)=>{
+    const j=(i+1)%n,a=x.stat.value,b=cur[j].stat.value;
+    if(a===null||b===null)return '';
+    const p1=pt(i,a),p2=pt(j,b);
+    return `<line x1="${p1[0]}" y1="${p1[1]}" x2="${p2[0]}" y2="${p2[1]}" stroke="#0f766e" stroke-width="2.6"/>`;
+  }).join('');
+
+  const prevEdges=prevCut?prev.map((x,i)=>{
+    const j=(i+1)%n,a=x.stat.value,b=prev[j].stat.value;
+    if(a===null||b===null)return '';
+    const p1=pt(i,a),p2=pt(j,b);
+    return `<line x1="${p1[0]}" y1="${p1[1]}" x2="${p2[0]}" y2="${p2[1]}" stroke="#94a3b8" stroke-width="1.5" stroke-dasharray="4 3"/>`;
+  }).join(''):'';
+
+  const axesSvg=cur.map((x,i)=>{
+    const [x1,y1]=pt(i,100),[lx,ly]=pt(i,100,142),val=x.stat.value;
+    const anchor=lx<cx-18?'end':lx>cx+18?'start':'middle';
+    const score=val===null?'未測定':`習熟度 ${val}/100`;
+    const p=val===null?null:pt(i,val);
+    const pp=prev[i].stat.value===null?null:pt(i,prev[i].stat.value);
+    return `<line x1="${cx}" y1="${cy}" x2="${x1}" y2="${y1}" stroke="#d6dee8"/>
+      ${p?`<circle cx="${p[0]}" cy="${p[1]}" r="4.5" fill="#fff" stroke="#0f766e" stroke-width="2.5"/>`:''}
+      ${pp?`<circle cx="${pp[0]}" cy="${pp[1]}" r="3" fill="#94a3b8"/>`:''}
+      <g class="axis-label" onclick="openAxis('${subject.replace(/'/g,"\\'")}','${x.id}')">
+        <text x="${lx}" y="${ly}" text-anchor="${anchor}" dominant-baseline="middle" font-size="10.5" font-weight="700" fill="#334155">${esc(x.label)}</text>
+        <text class="radar-score-label" x="${lx}" y="${ly+14}" text-anchor="${anchor}" dominant-baseline="middle">${score}</text>
+      </g>`;
+  }).join('');
+
+  const chips=cur.map(x=>`<button class="axis-chip" onclick="openAxis('${subject.replace(/'/g,"\\'")}','${x.id}')">
+    <b>${esc(x.label)}</b>
+    <div class="axis-chip-meta"><span class="${x.stat.value===null?'':'axis-chip-score'}">${axisStatusText(x.stat)}</span><span class="go">詳細を見る →</span></div>
+  </button>`).join('');
+
+  return `<div class="radar-wrap"><svg class="radar" viewBox="0 0 420 340" aria-label="${esc(subject)}の弱点マップ">
+    ${[.25,.5,.75,1].map(f=>`<polygon points="${ring(f)}" fill="none" stroke="#e2e8f0"/>`).join('')}
+    ${sectorFills}${prevEdges}${currentEdges}${axesSvg}
+  </svg></div>
+  <div class="radar-legend"><span><i class="dot current"></i>現在の推定習熟度</span>${prevCut?'<span><i class="dot prev"></i>前回診断時点</span>':''}</div>
+  ${measured<n?`<div style="text-align:center"><span class="radar-gap-note">未測定の軸は0点にせず、図形をつなげていません</span></div>`:''}
+  <div class="radar-note">数値は正答率そのものではなく、正誤・確信度・最近の回答履歴から算出した推定習熟度です。各分類をタップすると、回答数と細分類を確認できます。</div>
+  <div class="axis-grid">${chips}</div>`;
+}
+function weakCard(x){
+  const count=related(x.key).length;
+  return `<div class="weakcard"><div class="weakhead"><div><b>${esc(x.parts[3])}</b><div class="small muted">${x.parts.map(esc).join(' › ')}</div></div><span class="pill ${lvlc(x)}">${lvl(x)}</span></div><button class="btn soft" style="margin-top:10px;padding:10px" onclick="startTag('${x.key.replace(/'/g,"\\'")}')">この系列を演習する → <span class="small">（収録${count}問）</span></button></div>`;
+}
+function weakTopHtml(limit=3){
+  const w=conceptScores().slice(0,limit);if(!w.length)return '<p class="muted">回答データがまだありません。</p>';
+  return `<div class="weak-top">${w.map((x,i)=>{const count=related(x.key).length;return `<button class="weak-action" onclick="startTag('${x.key.replace(/'/g,"\\'")}')"><div class="weak-action-main"><span class="rankbox">${i+1}</span><div class="weak-copy"><b>${esc(x.parts[3])}</b>${x.mis?' <span class="badge-warn">重点復習</span>':''}<div class="weak-path">${x.parts.map(esc).join(' › ')}</div></div></div><div class="weak-action-footer"><span>この系列を演習する →</span><small>収録${count}問</small></div></button>`}).join('')}</div>`;
+}
+function diagnosisStatusHtml(){const d=diagnosisInfo();if(!d.last)return '<div class="diagstatus"><div><b>初回診断</b><div class="small muted">最初に必ず実施します</div></div><span class="badge-warn">必須</span></div>';const next=new Date(d.last.end.getTime()+14*86400000);return `<div class="diagstatus"><div><b>診断テスト</b><div class="small muted">前回：${d.last.end.toLocaleDateString('ja-JP')} ／ 次回目安：${next.toLocaleDateString('ja-JP')}</div></div>${d.recommended?'<span class="badge-warn">再診断おすすめ</span>':'<span class="badge-good">分析中</span>'}</div>`;}
+function home(){
+  const n=st.attempts.length,ok=st.attempts.filter(a=>a.correct).length,due=dueIds(),d=diagnosisInfo(),active=!!st.activeDiag;
+  if(!st.diagnosed){
+    S.innerHTML=`<div class="card hero">
+      <div id="installCard" class="install-card hidden">
+      <div class="install-title" data-install-title>スマホにインストールできます</div>
+      <div class="install-body" data-install-body></div>
+      <div class="install-actions">
+        <button class="btn" data-install-action onclick="installPWA()">アプリをインストール</button>
+        <button class="install-close" onclick="dismissInstallCard()">今は表示しない</button>
+      </div>
+    </div>
+    <div>${appRuntimeBadge()}</div>
+    <div class="note">初回は診断テストを必ず実施します。診断中は正解・解説を表示せず、終了後にまとめて確認できます。</div>
+      <h1>最初に診断テスト</h1>
+      <p class="muted">解剖学・生理学・運動学を横断して、弱点分析の基準データを作ります。途中で閉じても続きから再開できます。</p>
+      ${diagnosisStatusHtml()}
+      ${active?diagResumeHtml():`<button class="btn" style="margin-top:12px" onclick="startDiagnosis()">診断テストを始める</button>`}
+    </div>
+    <div class="footer-note">診断中は分野タグも非表示にして、問題文そのものから答える形にしています。</div>`;
+    NAV.classList.remove('hide');nav('home');scrollTopNow();setTimeout(renderInstallCard,0);return;
+  }
+
+  S.innerHTML=`<div class="card hero">
+    <div id="installCard" class="install-card hidden">
+    <div class="install-title" data-install-title>スマホにインストールできます</div>
+    <div class="install-body" data-install-body></div>
+    <div class="install-actions">
+      <button class="btn" data-install-action onclick="installPWA()">アプリをインストール</button>
+      <button class="install-close" onclick="dismissInstallCard()">今は表示しない</button>
+    </div>
+    </div>
+    <div>${appRuntimeBadge()}</div>
+    ${diagnosisStatusHtml()}
+    ${active?diagResumeHtml():''}
+    <h1>今日の学習</h1>
+    <p class="muted">誤答・確信度・最近の回答履歴から、復習する順番を自動で更新します。</p>
+    <div class="actions">
+      <button class="btn" ${due.length?'':'disabled'} onclick="start(due.slice(0,10),'review')">今日の復習対象（${due.length}問）</button>
+      <button class="btn secondary" onclick="practice()">分野を選んで演習</button>
+      ${active?'':`<button class="btn secondary" onclick="startDiagnosis()">診断テストを${d.recommended?'再実施':'実施'}</button>`}
+      ${d.last?`<button class="btn secondary" onclick="diagnosisResults('${d.last.id}')">前回の診断結果を見る</button>`:''}
+    </div>
+  </div>
+  <div class="card"><h2>3科目の現在地</h2>${subjectSummaryHtml()}<div class="data-note" style="margin-top:8px">「推定習熟度」は正答率そのものではありません。正誤・回答時の確信度・最近の回答履歴を0〜100に換算した目安です。</div></div>
+  <div class="card"><h2>現在の弱点 TOP3</h2><p class="small muted">カードをタップすると、その系列の問題をすぐ演習できます。</p>${weakTopHtml(3)}</div>
+  <div class="card"><div class="row" style="border-bottom:0;padding:0"><div><h2 style="margin:0 0 4px">あとで調べる</h2><div class="small muted">気になった用語を後で教科書などで確認</div></div><button class="btn soft" style="width:auto;padding:9px 12px" onclick="lookupPage()">${pendingLookup().length}件 →</button></div></div>
+  <div class="card"><h2>学習状況</h2><div class="stats"><div class="stat"><b>${n}</b><span class="small">累積回答</span></div><div class="stat"><b>${n?Math.round(ok/n*100):0}%</b><span class="small">累積正答</span></div><div class="stat"><b>${due.length}</b><span class="small">今日の復習</span></div></div><div class="helpbox" style="margin-top:10px"><b>重点復習</b><br>自信を持って答えたのに不正解だった内容は、通常の誤答より優先して復習に回します。</div></div>
+  <div class="footer-note">診断は通常14日ごとを目安に再実施。前回診断から7日以上経過し、その後100問以上演習した場合も再診断を提案します。</div>`;
+  NAV.classList.remove('hide');nav('home');scrollTopNow();setTimeout(renderInstallCard,0);
+}
+function startDiagnosis(){
+  if(st.activeDiag){resumeDiagnosis();return;}
+  const ids=chooseDiagnosisIds();if(!ids.length)return;
+  const sessionId=`${Date.now()}-${Math.random().toString(36).slice(2,8)}`;
+  st.activeDiag={ids:[...ids],i:0,sessionId,started:new Date().toISOString(),responses:[]};
+  save();resumeDiagnosis();
+}
+function resumeDiagnosis(){
+  const d=st.activeDiag;if(!d||!Array.isArray(d.ids)||!d.ids.length){st.activeDiag=null;save();startDiagnosis();return;}
+  ses={ids:[...d.ids],i:Math.min(d.i||0,d.ids.length),type:'diag',sessionId:d.sessionId,selected:new Set(),conf:null,answered:false,display:null,attempts:Array.isArray(d.responses)?[...d.responses]:[]};
+  if(ses.i>=ses.ids.length){finish();return;}
+  question();
+}
+function pauseDiagnosis(){
+  if(!ses||ses.type!=='diag'){home();return;}
+  st.activeDiag={ids:[...ses.ids],i:ses.i,sessionId:ses.sessionId,started:st.activeDiag?.started||new Date().toISOString(),responses:[...ses.attempts]};
+  save();ses=null;NAV.classList.remove('hide');home();
+}
+function restartDiagnosis(){
+  if(st.activeDiag&&!confirm('途中までの診断回答を破棄して、最初からやり直しますか？'))return;
+  st.activeDiag=null;save();startDiagnosis();
+}
+function practice(){
+  if(!st.diagnosed){home();return;}const subjects=Object.keys(ANALYTICS);
+  S.innerHTML=`<div class="card"><h1>分野別演習</h1><p class="muted">科目を選び、弱点マップと同じ分類から関連問題を選びます。</p><div class="practice-select">${subjects.map(s=>`<button class="selectbtn" onclick="practiceSubject('${s.replace(/'/g,"\\'")}')">${esc(s)} <span class="small muted">（${Q.filter(q=>q.subject===s).length}問収録）</span></button>`).join('')}</div><button class="btn secondary" style="margin-top:12px" onclick="home()">戻る</button></div>`;NAV.classList.add('hide');
+}
+function practiceSubject(subject){
+  const axes=ANALYTICS[subject]||[];
+  S.innerHTML=`<div class="card"><h1>${esc(subject)}を演習</h1><p class="muted">大まかな領域を選んでください。次の画面で、より細かい分野まで絞れます。</p><div class="practice-axis">${axes.map(a=>{const c=axisQuestions(subject,a.id).length;return `<button class="selectbtn" onclick="practiceAxis('${subject.replace(/'/g,"\\'")}','${a.id}')"><b>${esc(a.label)}</b><span class="small muted">${esc(a.description)} ／ 収録${c}問</span></button>`}).join('')}</div><button class="btn secondary" style="margin-top:12px" onclick="practice()">科目選択へ戻る</button></div>`;
+}
+function practiceAxis(subject,axisId){
+  const a=axisConfig(subject,axisId);if(!a)return;const total=axisQuestions(subject,axisId).length;
+  S.innerHTML=`<div class="card"><h1>${esc(a.label)}</h1><p class="muted">${esc(a.description)}</p><div class="practice-select"><button class="selectbtn" ${total?'':'disabled'} onclick="practiceCountAxis('${subject.replace(/'/g,"\\'")}','${axisId}')"><b>この領域全体</b><span class="small muted">収録${total}問</span></button>${a.subgroups.map(g=>{const c=Q.filter(q=>q.subject===subject&&q.domain===g.domain&&q.topic===g.topic).length;return `<button class="selectbtn" ${c?'':'disabled'} onclick="practiceCountSubgroup('${subject.replace(/'/g,"\\'")}','${g.domain.replace(/'/g,"\\'")}','${g.topic.replace(/'/g,"\\'")}','${axisId}')"><b>${esc(g.label)}</b><span class="small muted">収録${c}問${c?'':'・現在の試作版では未収録'}</span></button>`}).join('')}</div><button class="btn secondary" style="margin-top:12px" onclick="practiceSubject('${subject.replace(/'/g,"\\'")}')">領域選択へ戻る</button></div>`;
+}
+function countChooser(label,count,startCall,backCall){
+  S.innerHTML=`<div class="card"><h1>${esc(label)}</h1><p class="muted">出題数を選んでください。収録数より多い設定を選んだ場合は、収録されている問題をすべて出題します。</p><div class="mode-grid"><div class="mode-card"><b>5問</b><span class="small muted">短時間演習</span><button class="btn soft" onclick="${startCall.replace('__COUNT__','5')}">開始</button></div><div class="mode-card"><b>10問</b><span class="small muted">標準演習</span><button class="btn soft" onclick="${startCall.replace('__COUNT__','10')}">開始</button></div><div class="mode-card"><b>全部</b><span class="small muted">${count}問</span><button class="btn soft" onclick="${startCall.replace('__COUNT__','999')}">開始</button></div></div><button class="btn secondary" style="margin-top:12px" onclick="${backCall}">戻る</button></div>`;
+}
+function practiceCountAxis(subject,axisId){const a=axisConfig(subject,axisId),ids=axisQuestions(subject,axisId).map(q=>q.id);countChooser(a.label,ids.length,`startAxisPractice('${subject.replace(/'/g,"\\'")}','${axisId}',__COUNT__)`,`practiceAxis('${subject.replace(/'/g,"\\'")}','${axisId}')`);}
+function practiceCountSubgroup(subject,domain,topic,axisId){const ids=Q.filter(q=>q.subject===subject&&q.domain===domain&&q.topic===topic).map(q=>q.id);countChooser(topic,ids.length,`startSubgroupPractice('${subject.replace(/'/g,"\\'")}','${domain.replace(/'/g,"\\'")}','${topic.replace(/'/g,"\\'")}',__COUNT__)`,`practiceAxis('${subject.replace(/'/g,"\\'")}','${axisId}')`);}
+function startAxisPractice(subject,axisId,count){let ids=axisQuestions(subject,axisId).map(q=>q.id);ids=shuffle(ids).slice(0,Math.min(count,ids.length));if(ids.length)start(ids,'practice');}
+function startSubgroupPractice(subject,domain,topic,count){let ids=Q.filter(q=>q.subject===subject&&q.domain===domain&&q.topic===topic).map(q=>q.id);ids=shuffle(ids).slice(0,Math.min(count,ids.length));if(ids.length)start(ids,'practice');}
+function startWeak(){let ids=[];conceptScores().slice(0,6).forEach(x=>ids.push(...related(x.key)));ids=[...new Set(ids)].sort((a,b)=>profile(b).priority-profile(a).priority).slice(0,10);if(!ids.length)ids=shuffle(Q.map(q=>q.id)).slice(0,10);start(ids,'weakreview');}
+function startTag(key){const ids=related(key).sort((a,b)=>profile(b).priority-profile(a).priority).slice(0,5);if(ids.length)start(ids,'tagreview');}
+function start(ids,type){
+  if(!ids.length)return;
+  ses={ids:[...ids],i:0,type,sessionId:`${Date.now()}-${Math.random().toString(36).slice(2,8)}`,selected:new Set(),conf:null,answered:false,display:null,attempts:[]};
+  question();
+}
+function question(){
+  const q=qBy(ses.ids[ses.i]);ses.display=shuffle(q.options);const need=q.answers.length,isDiag=ses.type==='diag';
+  S.innerHTML=`<div class="card">
+    <div class="progress"><div style="width:${Math.round(ses.i/ses.ids.length*100)}%"></div></div>
+    <p class="small muted">${ses.i+1} / ${ses.ids.length}</p>
+    ${isDiag?'<div class="test-mode-badge">診断テスト</div>':`<div class="source">${q.source}</div>`}
+    ${isDiag?'':`<div class="tags"><span class="tag">${q.subject}</span><span class="tag">${q.domain}</span><span class="tag">${q.topic}</span><span class="tag">${q.concept}</span></div>`}
+    <h2>${q.question}</h2>
+    ${problemFigureHtml(q)}
+    ${need>1?`<p class="small muted">選択肢を ${need} つ選んでください。</p>`:''}
+    <div>${ses.display.map((o,idx)=>`<button class="choice" data-id="${o.id}" onclick="toggleChoice('${o.id}')"><b>${idx+1}.</b> ${o.text}</button>`).join('')}</div>
+    <p class="small muted">回答前の確信度</p>
+    <div class="confrow">
+      <button class="conf" data-c="high" onclick="setConf('high')">自信あり</button>
+      <button class="conf" data-c="mid" onclick="setConf('mid')">迷った</button>
+      <button class="conf" data-c="low" onclick="setConf('low')">わからない</button>
+    </div>
+    ${isDiag?'<div class="diag-note">診断中は正解・解説を表示しません。全問終了後に、間違えた問題や全問題をまとめて確認できます。</div>':''}
+    <button class="btn" id="answerBtn" onclick="answer()" disabled>${isDiag?'回答して次へ':'回答する'}</button>
+    ${isDiag?'<button class="btn secondary" style="margin-top:8px" onclick="pauseDiagnosis()">ここで中断してホームへ</button>':''}
+  </div>`;
+  NAV.classList.add('hide');scrollTopNow();
+}
+function toggleChoice(id){if(ses.answered)return;const need=qBy(ses.ids[ses.i]).answers.length;if(ses.selected.has(id))ses.selected.delete(id);else{if(ses.selected.size>=need)return;ses.selected.add(id);}document.querySelectorAll('.choice').forEach(el=>el.classList.toggle('sel',ses.selected.has(el.dataset.id)));sync();}
+function setConf(c){if(ses.answered)return;ses.conf=c;document.querySelectorAll('.conf').forEach(el=>el.classList.toggle('sel',el.dataset.c===c));sync();}
+function sync(){const q=qBy(ses.ids[ses.i]);document.getElementById('answerBtn').disabled=!(ses.conf&&ses.selected.size===q.answers.length);}
+function answer(){
+  const q=qBy(ses.ids[ses.i]),selected=[...ses.selected].sort(),expected=[...q.answers].sort(),correct=JSON.stringify(selected)===JSON.stringify(expected);
+  const rec={id:q.id,ts:new Date().toISOString(),correct,conf:ses.conf,type:ses.type,sessionId:ses.sessionId,selected:[...ses.selected]};
+
+  if(ses.type==='diag'){
+    ses.attempts.push(rec);
+    ses.i++;
+    st.activeDiag={ids:[...ses.ids],i:ses.i,sessionId:ses.sessionId,started:st.activeDiag?.started||new Date().toISOString(),responses:[...ses.attempts]};
+    save();
+    if(ses.i<ses.ids.length){
+      ses.selected=new Set();ses.conf=null;ses.answered=false;question();
+    }else finish();
+    return;
+  }
+
+  st.attempts.push(rec);ses.attempts.push(rec);save();ses.answered=true;
+  document.querySelectorAll('.choice').forEach(el=>{const id=el.dataset.id;if(q.answers.includes(id))el.classList.add('ok');if(ses.selected.has(id)&&!q.answers.includes(id))el.classList.add('ng');});
+
+  const optionHtml=ses.display.map((o,idx)=>`<div class="option-ex"><b>${q.answers.includes(o.id)?'✓ ':''}${idx+1}. ${o.text}</b><br/>${q.option_explanations[o.id]}</div>`).join('');
+  const gloss=(q.glossary||[]).map(g=>`<div class="gloss-item"><b>${g.term}</b><div class="small">${g.desc}</div>${lookupButton(g.term,q.id)}</div>`).join('');
+
+  document.getElementById('answerBtn').outerHTML=`
+    <div class="explain">
+      <div class="explain-result ${correct?'good':'bad'}"><h2 class="${correct?'result-good':'result-bad'}" style="margin:0">${correct?'正解':'不正解'}</h2></div>
+      <div class="section-box section-main"><h3>解説</h3><p>${q.why}</p></div>
+      <div class="section-box section-options"><h3>各選択肢</h3>${optionHtml}</div>
+      <div class="section-box section-related"><h3>関連する知識</h3><div>${q.related}</div></div>
+      ${(q.exam_links&&q.exam_links.length)?`<div class="section-box section-exam"><h3>国試で一緒に押さえる</h3><ul style="margin:8px 0 0 20px;padding:0">${q.exam_links.map(x=>`<li style="margin:5px 0">${x}</li>`).join('')}</ul></div>`:''}
+      <div class="section-box section-tip"><h3>覚えておくポイント</h3><div>${q.tip}</div></div>
+      ${gloss?`<div class="section-box" style="background:#fff;border:1px solid #dbe4ee"><h3>用語整理</h3><div class="gloss-grid">${gloss}</div></div>`:''}
+      <div class="section-box section-answer"><h3>公式正答</h3><div>第60回 ${q.source_session}${q.source_no}：${q.official_answers.join('・')}</div></div>
+    </div>
+    <button class="btn" style="margin-top:12px" onclick="nextQ()">${ses.i+1===ses.ids.length?'結果を見る':'次の問題'}</button>
+    <button class="btn secondary" style="margin-top:8px" onclick="continueRelated('${q.id}')">関連問題を続ける</button>`;
+}
+function continueRelated(id){
+  const q=qBy(id),axis=axisForQuestion(q);let qs=[];
+  if(axis)qs=axisQuestions(q.subject,axis.id);
+  const sameTopic=qs.filter(x=>x.domain===q.domain&&x.topic===q.topic),others=qs.filter(x=>!(x.domain===q.domain&&x.topic===q.topic));
+  let ids=[...shuffle(sameTopic),...shuffle(others)].map(x=>x.id).slice(0,5);if(!ids.length)ids=[q.id];start(ids,'practice');
+}
+function nextQ(){
+  ses.i++;
+  if(ses.i<ses.ids.length){ses.selected=new Set();ses.conf=null;ses.answered=false;question();}
+  else finish();
+}
+function latestDiagnosisRecords(){
+  const runs=diagnosisRuns();if(!runs.length)return [];
+  const id=runs[runs.length-1].id;
+  return st.attempts.filter(a=>a.type==='diag'&&(a.sessionId||`legacy-${dayKey(a.ts)}`)===id);
+}
+function finish(){
+  if(ses.type==='diag'){
+    const committed=[...ses.attempts],sessionId=ses.sessionId;
+    st.attempts.push(...committed);
+    st.diagnosed=true;
+    st.lastDiagSessionId=sessionId;
+    st.activeDiag=null;
+    save();
+    ses=null;
+    diagnosisResults(sessionId);
+    return;
+  }
+
+  save();const n=ses.attempts.length,ok=ses.attempts.filter(a=>a.correct).length,w=conceptScores().slice(0,5);
+  S.innerHTML=`<div class="card"><h1>演習結果</h1><div class="stats"><div class="stat"><b>${ok}/${n}</b><span class="small">正解</span></div><div class="stat"><b>${Math.round(ok/n*100)}%</b><span class="small">正答率</span></div><div class="stat"><b>${dueIds().length}</b><span class="small">今日の復習</span></div></div><p class="muted">正誤・確信度・最近の履歴を蓄積し、弱点推定を更新しました。</p><button class="btn" onclick="ses=null;NAV.classList.remove('hide');home()">ホームへ</button></div><div class="card"><h2>要復習候補</h2>${w.length?w.map(weakCard).join(''):'<p class="muted">まだありません。</p>'}</div>`;
+  NAV.classList.remove('hide');scrollTopNow();
+}
+function diagnosisResults(sessionId=null){
+  const runs=diagnosisRuns();
+  const id=sessionId||(runs.length?runs[runs.length-1].id:null);
+  if(!id){home();return;}
+  const recs=diagnosisRecordsBySession(id);
+  if(!recs.length){home();return;}
+
+  const n=recs.length,ok=recs.filter(a=>a.correct).length,bad=n-ok,pct=Math.round(ok/n*100);
+  const subjects=diagSubjectStats(recs);
+  const conf=diagConfidenceStats(recs);
+  const focus=conf.highWrong;
+  const prev=previousDiagnosisFor(id);
+  const prevRecs=prev?diagnosisRecordsBySession(prev.id):[];
+  const prevSubjects=prevRecs.length?diagSubjectStats(prevRecs):[];
+
+  const subjectHtml=`<div class="result-subject-grid">${subjects.map(x=>`<div class="result-subject">
+    <div class="subject-name">${esc(x.subject)}</div>
+    <div><span class="subject-frac">${x.ok}/${x.total}</span><span class="subject-pct">${x.pct}%</span></div>
+    <div class="mini-meter"><span style="width:${x.pct}%"></span></div>
+  </div>`).join('')}</div>`;
+
+  const confHtml=`<div class="conf-matrix">
+    <div class="conf-cell correct"><b>${conf.highCorrect}</b><span>自信あり<br>正解</span></div>
+    <div class="conf-cell correct"><b>${conf.midCorrect}</b><span>迷った<br>正解</span></div>
+    <div class="conf-cell correct"><b>${conf.lowCorrect}</b><span>わからない<br>正解</span></div>
+    <div class="conf-cell wrong"><b>${conf.highWrong}</b><span>自信あり<br>不正解</span></div>
+    <div class="conf-cell wrong"><b>${conf.midWrong}</b><span>迷った<br>不正解</span></div>
+    <div class="conf-cell wrong"><b>${conf.lowWrong}</b><span>わからない<br>不正解</span></div>
+  </div>`;
+
+  let changeHtml='';
+  if(prevSubjects.length){
+    const rows=subjects.map(cur=>{
+      const old=prevSubjects.find(x=>x.subject===cur.subject);
+      if(!old)return '';
+      const delta=cur.pct-old.pct,cls=delta>0?'up':delta<0?'down':'';
+      const sign=delta>0?'+':'';
+      return `<div class="change-row">
+        <div class="change-main"><b>${esc(cur.subject)}</b><div class="change-values">${old.pct}% → ${cur.pct}%</div></div>
+        <span class="change-delta ${cls}">${sign}${delta}pt</span>
+      </div>`;
+    }).join('');
+    changeHtml=`<div class="card"><h2>前回診断からの変化</h2><div class="change-list">${rows}</div><div class="result-note">前回と今回で出題問題が異なる場合があるため、正答率の変化は目安として見てください。</div></div>`;
+  }
+
+  S.innerHTML=`<div class="card">
+    <h1>診断結果</h1>
+    <div class="diag-hero-score"><div class="fraction">${ok} / ${n}</div><div class="percent">今回の正答率 ${pct}%</div></div>
+    <p class="muted" style="text-align:center">ここは今回の診断テストの成績です。下の「推定習熟度」とは別の指標です。</p>
+  </div>
+
+  <div class="card"><h2>科目別の成績</h2>${subjectHtml}</div>
+
+  <div class="card">
+    <h2>回答の確信度</h2>
+    <p class="small muted">正解・不正解だけでなく、答えたときの確信度も弱点分析に使います。</p>
+    ${confHtml}
+  </div>
+
+  <div class="card">
+    <h2>重点確認</h2>
+    <div class="focus-card">
+      <div class="focus-count">${focus}問</div>
+      <p>自信を持って答えたものの、不正解だった問題です。通常の誤答より優先して復習に回します。</p>
+      <button class="btn" ${focus?'':'disabled'} onclick="diagnosisReview('focus')">重点確認の問題を見る →</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>現在の弱点 TOP3</h2>
+    <p class="small muted">「推定習熟度」は、今回だけでなくこれまでの正誤・確信度・最近の回答履歴から算出します。</p>
+    ${resultWeakHtml(3)}
+    <button class="btn secondary" style="margin-top:10px" onclick="weak()">弱点を詳しく見る →</button>
+  </div>
+
+  ${changeHtml}
+
+  <div class="card">
+    <h2>問題を見直す</h2>
+    <div class="result-actions">
+      <button class="btn" ${bad?'':'disabled'} onclick="diagnosisReview('wrong')">間違えた問題（${bad}問）</button>
+      <button class="btn secondary" onclick="diagnosisReview('all')">全問題を確認</button>
+      <button class="btn secondary" onclick="home()">ホームへ</button>
+    </div>
+  </div>`;
+  NAV.classList.remove('hide');nav('home');scrollTopNow();
+}
+function diagnosisReview(mode='wrong'){
+  const recs=latestDiagnosisRecords();
+  const items=mode==='wrong'?recs.filter(a=>!a.correct):mode==='focus'?recs.filter(a=>!a.correct&&a.conf==='high'):recs;
+  const title=mode==='wrong'?'間違えた問題':mode==='focus'?'重点確認の問題':'診断問題';
+  S.innerHTML=`<div class="card">
+    <button class="backlink" onclick="diagnosisResults()">← 診断結果へ戻る</button>
+    <h1>${title}を確認</h1>
+    <p class="muted">診断結果の確認用です。ここで見ても新しい回答履歴には加算しません。</p>
+    ${items.length?`<div class="diag-summary-list">${items.map((a,i)=>{const q=qBy(a.id);return `<button class="diag-summary-item ${a.correct?'good':'bad'}" onclick="diagnosisReviewQuestion('${a.id}','${mode}')"><b>${i+1}. ${esc(q.question)}</b><span class="${a.correct?'result-good':'result-bad'}">${a.correct?'正解':'不正解'}</span> <span class="small muted">／ ${q.subject}・${q.concept}</span></button>`}).join('')}</div>`:'<div class="lookup-empty">確認対象はありません。</div>'}
+  </div>`;
+  NAV.classList.remove('hide');scrollTopNow();
+}
+function diagnosisReviewQuestion(id,mode){
+  const q=qBy(id),recs=latestDiagnosisRecords(),a=recs.find(x=>x.id===id);if(!q||!a){diagnosisReview(mode);return;}
+  const selected=new Set(a.selected||[]);
+  const optionHtml=q.options.map((o,idx)=>`<div class="option-ex"><b>${q.answers.includes(o.id)?'✓ ':''}${idx+1}. ${o.text}${selected.has(o.id)?'　<span class="small">← あなたの回答</span>':''}</b><br/>${q.option_explanations[o.id]}</div>`).join('');
+  const gloss=(q.glossary||[]).map(g=>`<div class="gloss-item"><b>${g.term}</b><div class="small">${g.desc}</div>${lookupButton(g.term,q.id)}</div>`).join('');
+  S.innerHTML=`<div class="card">
+    <button class="backlink" onclick="diagnosisReview('${mode}')">← 一覧へ戻る</button>
+    <div class="source">${q.source}</div>
+    <h2>${q.question}</h2>
+    ${problemFigureHtml(q)}
+    <div class="explain">
+      <div class="explain-result ${a.correct?'good':'bad'}"><h2 class="${a.correct?'result-good':'result-bad'}" style="margin:0">${a.correct?'正解':'不正解'}</h2></div>
+      <div class="section-box section-main"><h3>解説</h3><p>${q.why}</p></div>
+      <div class="section-box section-options"><h3>各選択肢</h3>${optionHtml}</div>
+      <div class="section-box section-related"><h3>関連する知識</h3><div>${q.related}</div></div>
+      ${(q.exam_links&&q.exam_links.length)?`<div class="section-box section-exam"><h3>国試で一緒に押さえる</h3><ul style="margin:8px 0 0 20px;padding:0">${q.exam_links.map(x=>`<li style="margin:5px 0">${x}</li>`).join('')}</ul></div>`:''}
+      <div class="section-box section-tip"><h3>覚えておくポイント</h3><div>${q.tip}</div></div>
+      ${gloss?`<div class="section-box" style="background:#fff;border:1px solid #dbe4ee"><h3>用語整理</h3><div class="gloss-grid">${gloss}</div></div>`:''}
+    </div>
+  </div>`;
+  NAV.classList.remove('hide');scrollTopNow();
+}
+function openAxis(subject,axisId){
+  const a=axisConfig(subject,axisId);if(!a)return;const ax=axisStats(subject,axisId);
+  const groups=a.subgroups.map(g=>({...g,stat:subgroupStats(subject,g.domain,g.topic)}));
+  S.innerHTML=`<div class="card"><button class="backlink" onclick="weak()">← 弱点分析へ戻る</button><div class="axis-detail-head"><div><h1>${esc(subject)}：${esc(a.label)}</h1><p class="muted">${esc(a.description)}</p></div><div>${ax.value===null?'<div class="subgroup-score mutedscore">未測定</div>':`<div class="axis-detail-score-label">推定習熟度</div><div class="axis-detail-score-value">${ax.value} / 100</div>`}</div></div>${ax.value!==null?`<div class="mini-meter"><span style="width:${ax.value}%"></span></div>`:''}<div class="small muted">回答済み ${ax.seen} / 収録 ${ax.total} 問${ax.insufficient&&ax.value!==null?'・現時点ではデータ少':''}</div><button class="btn soft" style="margin-top:12px" ${ax.total?'':'disabled'} onclick="startAxisPractice('${subject.replace(/'/g,"\\'")}','${axisId}',5)">この領域を演習する →</button></div>
+  <div class="card"><h2>細分類</h2>${groups.map(g=>{const c=subgroupConcepts(subject,g.domain,g.topic),s=g.stat;return `<div class="subgroup-card"><div class="subgroup-head"><div><b>${esc(g.label)}</b><div class="small muted">${esc(g.domain)}</div></div><div>${s.total===0?'<div class="subgroup-score mutedscore">問題未収録</div>':s.value===null?'<div class="subgroup-score mutedscore">未測定</div>':`<div class="subgroup-score-label">推定習熟度</div><div class="subgroup-score">${s.value} / 100</div>`}</div></div>${s.value!==null?`<div class="mini-meter"><span style="width:${s.value}%"></span></div>`:''}<div class="small muted">回答済み ${s.seen} / 収録 ${s.total} 問</div>${c.length?`<div class="concept-list">${c.slice(0,4).map(x=>`<div class="concept-row"><span>${esc(x.q.concept)} ${x.mastery===null?'<span class="status-unmeasured">未測定</span>':`<span class="${x.mastery<60?'status-focus':'status-ok'}">習熟度 ${x.mastery}/100</span>`}</span><button onclick="startConcept('${x.q.id}')">演習 →</button></div>`).join('')}</div>`:''}${s.total?`<button class="btn secondary" style="margin-top:9px;padding:9px;font-size:13px" onclick="startSubgroupPractice('${subject.replace(/'/g,"\\'")}','${g.domain.replace(/'/g,"\\'")}','${g.topic.replace(/'/g,"\\'")}',5)">この細分類を演習する →</button>`:''}</div>`}).join('')}</div>`;
+  nav('weak');
+}
+function startConcept(id){const q=qBy(id),pool=Q.filter(x=>x.subject===q.subject&&(x.concept===q.concept||(x.secondary||[]).some(t=>(q.secondary||[]).includes(t))));let ids=shuffle(pool.map(x=>x.id)).slice(0,5);if(!ids.length)ids=[id];start(ids,'tagreview');}
+
+function weak(){
+  if(!st.diagnosed){home();return;}const subjects=Object.keys(ANALYTICS);
+  S.innerHTML=`<div class="card"><h1>弱点分析</h1><p class="muted">回答履歴から、科目全体→領域→細分類→概念の順に弱点を確認できます。</p>${subjectSummaryHtml()}</div><div class="card"><h2>現在の弱点 TOP3</h2><p class="small muted">タップすると、その系列の問題をすぐ演習できます。</p>${weakTopHtml(3)}</div>${subjects.map(s=>`<div class="card"><h2>${esc(s)}</h2>${radarSvg(s)}</div>`).join('')}<div class="card"><h2>概念別</h2>${conceptScores().slice(0,12).map(weakCard).join('')||'<p class="muted">まだありません。</p>'}</div>`;nav('weak');
+}
+
+function lookupPage(){
+  const pending=[...st.lookup].filter(x=>!x.done).sort((a,b)=>new Date(b.added)-new Date(a.added));
+  const done=[...st.lookup].filter(x=>x.done).sort((a,b)=>new Date(b.added)-new Date(a.added));
+  const card=x=>{
+    const q=qBy(x.qid);
+    const path=q?`${q.subject} › ${q.domain} › ${q.topic} › ${q.concept}`:'元の問題情報なし';
+    const src=q?q.source:'';
+    return `<div class="lookup-card ${x.done?'done':''}">
+      <div class="lookup-term">${esc(x.term)}</div>
+      <div class="lookup-path">${esc(path)}${src?`<br>${esc(src)}`:''}</div>
+      <div class="lookup-actions">
+        <button class="primary" ${q?'':'disabled'} onclick="start(['${x.qid}'],'lookupreview')">元の問題を見る</button>
+        <button class="donebtn" onclick="toggleLookupDone('${x.key.replace(/'/g,"\\'")}')">${x.done?'未確認に戻す':'✓ 確認済みにする'}</button>
+      </div>
+      ${x.done?`<button class="backlink" style="margin-top:8px;color:#64748b" onclick="removeLookup('${x.key.replace(/'/g,"\\'")}')">一覧から削除</button>`:''}
+    </div>`;
+  };
+  S.innerHTML=`<div class="card"><h1>あとで調べる</h1>
+    <p class="muted">解説中に気になった用語だけ保存しておき、あとで教科書や授業資料で確認するための一覧です。</p>
+    <div class="stats">
+      <div class="stat"><b>${pending.length}</b><span class="small">未確認</span></div>
+      <div class="stat"><b>${done.length}</b><span class="small">確認済み</span></div>
+      <div class="stat"><b>${st.lookup.length}</b><span class="small">保存合計</span></div>
+    </div>
+  </div>
+  <div class="card"><h2>未確認</h2>${pending.length?`<div class="lookup-list">${pending.map(card).join('')}</div>`:'<div class="lookup-empty">保存した用語はありません。<br>問題解説の「＋ あとで調べる」から追加できます。</div>'}</div>
+  ${done.length?`<div class="card"><h2>確認済み</h2><div class="lookup-list">${done.map(card).join('')}</div></div>`:''}`;
+  NAV.classList.remove('hide');nav('lookup');scrollTopNow();
+}
+
+function exportStudyData(){
+  const payload={format:'ptot-study-data',version:1,appVersion:'1.7',exportedAt:new Date().toISOString(),data:st};
+  const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
+  const url=URL.createObjectURL(blob),a=document.createElement('a'),d=new Date(),ymd=`${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}`;
+  a.href=url;a.download=`ptot-study-backup-${ymd}.json`;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
+}
+function triggerImport(){document.getElementById('backupInput')?.click();}
+async function importStudyData(input){
+  const file=input.files&&input.files[0];if(!file)return;
+  try{
+    const raw=JSON.parse(await file.text()),data=raw&&raw.format==='ptot-study-data'?raw.data:raw;
+    if(!data||!Array.isArray(data.attempts))throw new Error('学習データ形式ではありません');
+    if(!confirm('現在の学習データを、読み込んだバックアップで置き換えますか？')){input.value='';return;}
+    st={
+      attempts:Array.isArray(data.attempts)?data.attempts:[],
+      diagnosed:!!data.diagnosed,
+      lookup:Array.isArray(data.lookup)?data.lookup:[],
+      activeDiag:data.activeDiag&&Array.isArray(data.activeDiag.ids)?data.activeDiag:null,
+      lastDiagSessionId:data.lastDiagSessionId||null
+    };
+    ses=null;save();alert('学習データを復元しました。');home();
+  }catch(e){alert('読み込みに失敗しました：'+e.message);}
+  input.value='';
+}
+function hist(){
+  if(!st.diagnosed&&!st.attempts.length){home();return;}const a=[...st.attempts].reverse().slice(0,50);
+  S.innerHTML=`<div class="card"><h1>履歴</h1>${a.length?a.map(x=>{const q=qBy(x.id);if(!q)return'';return `<div class="row"><div><b>${q.subject} / ${q.concept}</b><div class="small muted">${q.source}・${new Date(x.ts).toLocaleString('ja-JP')}</div></div><span class="${x.correct?'result-good':'result-bad'}">${x.correct?'○':'×'}・${x.conf==='high'?'自信':x.conf==='mid'?'迷い':'不明'}</span></div>`}).join(''):'<p class="muted">履歴なし</p>'}</div>
+  <div class="card"><h2>学習データのバックアップ</h2><p class="muted">ログインを使わないため、端末変更やブラウザデータ削除に備えてファイルへ保存できます。</p><div class="data-actions"><button class="btn soft" onclick="exportStudyData()">学習データを書き出す</button><button class="btn secondary" onclick="triggerImport()">バックアップを読み込む</button></div><input id="backupInput" class="file-input" type="file" accept=".json,application/json" onchange="importStudyData(this)"><div class="data-note-box">回答履歴、弱点分析用データ、「あとで調べる」、途中の診断テストを1つのJSONファイルに保存します。</div></div>
+  <div class="card"><h2>データ初期化</h2><p class="muted">端末内の回答履歴と保存内容をすべて削除します。</p><button class="btn" style="background:#64748b" onclick="resetData()">学習データを初期化</button></div>`;nav('hist');scrollTopNow();
+}
+function resetData(){if(confirm('回答履歴・あとで調べる・途中の診断を含む学習データをすべて削除しますか？')){localStorage.removeItem(KEY);st={attempts:[],diagnosed:false,lookup:[],activeDiag:null,lastDiagSessionId:null};ses=null;save();home();}}
+function nav(p){document.querySelectorAll('.nav button').forEach(b=>b.classList.toggle('on',b.dataset.p===p));}
+document.querySelectorAll('.nav button').forEach(b=>{b.onclick=()=>{if(b.dataset.p==='home')home();else if(b.dataset.p==='weak')weak();else if(b.dataset.p==='lookup')lookupPage();else hist();};});
+updateLookupNav();home();
+if('serviceWorker' in navigator && (location.protocol==='https:' || location.hostname==='localhost' || location.hostname==='127.0.0.1')){
+  window.addEventListener('load',async()=>{
+    try{
+      const reg=await navigator.serviceWorker.register('./sw.js');
+      reg.update().catch(()=>{});
+    }catch(e){}
+  });
+}
+
+</script>
+</body>
+</html>
