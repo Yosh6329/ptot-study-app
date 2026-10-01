@@ -9,7 +9,7 @@
 <meta name="apple-mobile-web-app-title" content="PT/OT国試"/>
 <link rel="manifest" href="./manifest.webmanifest"/>
 <link rel="apple-touch-icon" href="./app-icon-192.png"/>
-<title>PT/OT国試 基礎3科目 弱点診断 v1.15</title>
+<title>PT/OT国試 基礎3科目 弱点診断 v1.16</title>
 <style>
 :root{--bg:#f4f6f8;--card:#fff;--text:#15202b;--muted:#64748b;--line:#e2e8f0;--teal:#0f766e;--teal2:#115e59;--good:#15803d;--bad:#b91c1c;--warn:#b45309}
 *{box-sizing:border-box}
@@ -74,8 +74,9 @@ p{line-height:1.72;margin:8px 0}
 .knowledge{background:#f8fafc;border:1px solid var(--line);border-radius:10px;padding:11px;margin-top:10px;line-height:1.65}
 .result-good{color:var(--good)} .result-bad{color:var(--bad)}
 .weakcard{padding:12px;border:1px solid var(--line);border-radius:13px;margin:9px 0;background:#fbfcfd}
-.weakhead{display:flex;justify-content:space-between;gap:10px}
-.pill{font-size:11px;font-weight:800;padding:4px 8px;border-radius:999px;background:#dff5f2;color:var(--teal2)}
+.weakhead{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
+.weakhead>div:first-child{min-width:0;flex:1}
+.pill{display:inline-flex;align-items:center;justify-content:center;flex:0 0 auto;white-space:nowrap;word-break:keep-all;overflow-wrap:normal;line-height:1.2;font-size:11px;font-weight:800;padding:7px 10px;border-radius:999px;background:#dff5f2;color:var(--teal2)}
 .pill.mid{background:#fff7ed;color:var(--warn)}
 .pill.high{background:#fef2f2;color:var(--bad)}
 .row{display:flex;justify-content:space-between;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line)}
@@ -284,7 +285,8 @@ p{line-height:1.72;margin:8px 0}
 
 
 /* v1.11 */
-/* v1.15: 画像拡大・公式原図導線、重点復習バッジ折返し防止、用語整理拡張、検証済みSVG解説図の試験導入 */
+/* v1.15: 画像拡大・公式原図導線、用語整理拡張、検証済みSVG解説図の試験導入 */
+/* v1.16: 重点復習バッジ完全1行化、概念選択を必ず先頭出題、図解バッジ、問題検索 */
 .practice-select .selectbtn,.practice-axis .selectbtn{position:relative}
 .practice-btn-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
 .practice-btn-title{min-width:0;flex:1}
@@ -307,11 +309,20 @@ p{line-height:1.72;margin:8px 0}
 .figure-source-link{display:inline-block;margin-top:7px;font-size:10px;color:#64748b;text-decoration:underline;text-underline-offset:2px}
 .figure img{background:#fff}
 
+.figure-badge{display:inline-flex;align-items:center;margin-left:6px;padding:3px 7px;border-radius:999px;background:#eff6ff;color:#1d4ed8;border:1px solid #bfdbfe;font-size:10px;font-weight:850;white-space:nowrap;vertical-align:middle}
+.question-search-box{display:flex;gap:8px;margin-top:10px}
+.question-search-input{flex:1;min-width:0;border:1px solid #cbd5e1;border-radius:12px;padding:12px 13px;font-size:16px;background:#fff;color:var(--text)}
+.question-search-results{display:grid;gap:9px;margin-top:12px}
+.question-search-item{width:100%;text-align:left;border:1px solid var(--line);background:#fff;border-radius:13px;padding:12px;color:var(--text);cursor:pointer}
+.question-search-item b{display:block;font-size:14px;line-height:1.55}
+.question-search-meta{font-size:11px;color:var(--muted);margin-top:5px;line-height:1.5}
+.question-search-empty{padding:18px;text-align:center;color:var(--muted);background:#f8fafc;border:1px dashed #cbd5e1;border-radius:12px}
+
 </style>
 </head>
 <body>
 <div class="app">
-  <div class="top"><div class="brand">PT/OT国試 基礎3科目</div><span class="version">v1.15 第59・60回96問版</span></div>
+  <div class="top"><div class="brand">PT/OT国試 基礎3科目</div><span class="version">v1.16 第59・60回96問版</span></div>
   <div id="screen"></div>
 </div>
 <div class="nav" id="nav"><div class="navin">
@@ -367,8 +378,9 @@ function closeImageModal(){
 }
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeImageModal();});
 
+function hasExplanationFigure(q){return !!q && q.id==='59A52';}
 function explanationFigureHtml(q){
-  if(q.id!=='59A52')return '';
+  if(!hasExplanationFigure(q))return '';
   return `<div class="edu-figure"><div class="edu-figure-title">サルコメアの帯とフィラメント分布</div>
   <svg viewBox="0 0 760 300" role="img" aria-label="サルコメア内のA帯、I帯、H帯とアクチン・ミオシンの分布">
     <rect x="48" y="48" width="664" height="160" rx="12" fill="#f8fafc" stroke="#cbd5e1"/>
@@ -799,6 +811,7 @@ function home(){
     <div class="actions">
       <button class="btn" ${due.length?'':'disabled'} onclick="startTodayReview()">今日の復習対象（${due.length}問）</button>
       <button class="btn secondary" onclick="practice()">分野を選んで演習</button>
+      <button class="btn secondary" onclick="questionSearch()">問題を探す</button>
       ${active?'':`<button class="btn secondary" onclick="startDiagnosis()">診断テストを${d.recommended?'再実施':'実施'}</button>`}
       ${d.last?`<button class="btn secondary" onclick="diagnosisResults('${d.last.id}')">前回の診断結果を見る</button>`:''}
     </div>
@@ -1082,10 +1095,30 @@ function openAxis(subject,axisId){
   const a=axisConfig(subject,axisId);if(!a)return;scrollTopNow();const ax=axisStats(subject,axisId),axStatus=areaStatus(ax,axisQuestions(subject,axisId));
   const groups=a.subgroups.map(g=>({...g,stat:subgroupStats(subject,g.domain,g.topic)}));
   S.innerHTML=`<div class="card"><button class="backlink" onclick="weak()">← 弱点分析へ戻る</button><div class="axis-detail-head"><div><h1>${esc(subject)}：${esc(a.label)}</h1><p class="muted">${esc(a.description)}</p><div class="axis-detail-status">${statusBadge(axStatus)}</div></div><div>${ax.value===null?'<div class="subgroup-score mutedscore">未測定</div>':`<div class="axis-detail-score-label">推定習熟度</div><div class="axis-detail-score-value">${ax.value} / 100</div>`}</div></div>${ax.value!==null?`<div class="mini-meter"><span style="width:${ax.value}%"></span></div>`:''}<button class="btn soft" style="margin-top:12px" ${ax.total?'':'disabled'} onclick="startAxisPractice('${subject.replace(/'/g,"\\'")}','${axisId}',5)">この領域を演習する →</button></div>
-  <div class="card"><h2>細分類</h2>${groups.map(g=>{const c=subgroupConcepts(subject,g.domain,g.topic),s=g.stat,qs=Q.filter(q=>q.subject===subject&&q.domain===g.domain&&q.topic===g.topic);s.insufficient=s.seen<3;const status=areaStatus(s,qs);return `<div class="subgroup-card"><div class="subgroup-head"><div><b>${esc(g.label)}</b><div class="small muted">${esc(g.domain)}</div><div style="margin-top:5px">${statusBadge(status)}</div></div><div>${s.total===0?'<div class="subgroup-score mutedscore">準備中</div>':s.value===null?'<div class="subgroup-score mutedscore">未測定</div>':`<div class="subgroup-score-label">推定習熟度</div><div class="subgroup-score">${s.value} / 100</div>`}</div></div>${s.value!==null?`<div class="mini-meter"><span style="width:${s.value}%"></span></div>`:''}${c.length?`<div class="concept-list">${c.slice(0,4).map(x=>`<div class="concept-row"><span>${esc(x.q.concept)} ${x.mastery===null?'<span class="status-unmeasured">未測定</span>':`<span class="${x.mastery<60?'status-focus':'status-ok'}">習熟度 ${x.mastery}/100</span>`}</span><button onclick="startConcept('${x.q.id}')">演習 →</button></div>`).join('')}</div>`:''}${s.total?`<button class="btn secondary" style="margin-top:9px;padding:9px;font-size:13px" onclick="startSubgroupPractice('${subject.replace(/'/g,"\\'")}','${g.domain.replace(/'/g,"\\'")}','${g.topic.replace(/'/g,"\\'")}',5)">この細分類を演習する →</button>`:''}</div>`}).join('')}</div>`;
+  <div class="card"><h2>細分類</h2>${groups.map(g=>{const c=subgroupConcepts(subject,g.domain,g.topic),s=g.stat,qs=Q.filter(q=>q.subject===subject&&q.domain===g.domain&&q.topic===g.topic);s.insufficient=s.seen<3;const status=areaStatus(s,qs);return `<div class="subgroup-card"><div class="subgroup-head"><div><b>${esc(g.label)}</b><div class="small muted">${esc(g.domain)}</div><div style="margin-top:5px">${statusBadge(status)}</div></div><div>${s.total===0?'<div class="subgroup-score mutedscore">準備中</div>':s.value===null?'<div class="subgroup-score mutedscore">未測定</div>':`<div class="subgroup-score-label">推定習熟度</div><div class="subgroup-score">${s.value} / 100</div>`}</div></div>${s.value!==null?`<div class="mini-meter"><span style="width:${s.value}%"></span></div>`:''}${c.length?`<div class="concept-list">${c.slice(0,4).map(x=>`<div class="concept-row"><span>${esc(x.q.concept)}${hasExplanationFigure(x.q)?' <span class="figure-badge">図解あり</span>':''} ${x.mastery===null?'<span class="status-unmeasured">未測定</span>':`<span class="${x.mastery<60?'status-focus':'status-ok'}">習熟度 ${x.mastery}/100</span>`}</span><button onclick="startConcept('${x.q.id}')">演習 →</button></div>`).join('')}</div>`:''}${s.total?`<button class="btn secondary" style="margin-top:9px;padding:9px;font-size:13px" onclick="startSubgroupPractice('${subject.replace(/'/g,"\\'")}','${g.domain.replace(/'/g,"\\'")}','${g.topic.replace(/'/g,"\\'")}',5)">この細分類を演習する →</button>`:''}</div>`}).join('')}</div>`;
   nav('weak');scrollTopNow();
 }
-function startConcept(id){const q=qBy(id),pool=Q.filter(x=>x.subject===q.subject&&(x.concept===q.concept||(x.secondary||[]).some(t=>(q.secondary||[]).includes(t))));let ids=shuffle(pool.map(x=>x.id)).slice(0,5);if(!ids.length)ids=[id];start(ids,'tagreview');}
+function startConcept(id){const q=qBy(id);if(!q)return;const pool=Q.filter(x=>x.id!==id&&x.subject===q.subject&&(x.concept===q.concept||(x.secondary||[]).some(t=>(q.secondary||[]).includes(t))));const ids=[id,...shuffle(pool.map(x=>x.id)).slice(0,4)];start(ids,'tagreview');}
+
+
+function questionSearch(initial=''){
+  S.innerHTML=`<div class="card"><button class="backlink" onclick="home()">← ホームへ戻る</button><h1>問題を探す</h1><p class="muted">問題文・概念・関連用語・出典から検索できます。例：サルコメア、黒質、歩行。</p><div class="question-search-box"><input id="questionSearchInput" class="question-search-input" type="search" value="${esc(initial)}" placeholder="検索語を入力" oninput="renderQuestionSearch(this.value)"></div><div id="questionSearchResults" class="question-search-results"></div></div>`;
+  NAV.classList.remove('hide');nav('home');scrollTopNow();renderQuestionSearch(initial);setTimeout(()=>document.getElementById('questionSearchInput')?.focus(),0);
+}
+function renderQuestionSearch(term=''){
+  const box=document.getElementById('questionSearchResults');if(!box)return;
+  const t=String(term||'').trim().toLowerCase();
+  let rows;
+  if(t){
+    rows=Q.filter(q=>[q.id,q.source,q.subject,q.domain,q.topic,q.concept,q.question,...(q.secondary||[])].join(' ').toLowerCase().includes(t));
+  }else{
+    rows=Q.filter(q=>hasExplanationFigure(q));
+  }
+  rows=rows.slice(0,40);
+  if(!rows.length){box.innerHTML='<div class="question-search-empty">該当する問題はありません。</div>';return;}
+  box.innerHTML=rows.map(q=>`<button class="question-search-item" onclick="startExactQuestion('${q.id}')"><b>${esc(q.question)}</b><div class="question-search-meta">${esc(q.source)}<br>${esc(q.subject)} › ${esc(q.domain)} › ${esc(q.topic)} › ${esc(q.concept)}${hasExplanationFigure(q)?' <span class="figure-badge">図解あり</span>':''}</div></button>`).join('');
+}
+function startExactQuestion(id){if(!qBy(id))return;start([id],'practice');}
 
 function weak(){
   if(!st.diagnosed){home();return;}const subjects=Object.keys(ANALYTICS);scrollTopNow();
@@ -1123,7 +1156,7 @@ function lookupPage(){
 }
 
 function exportStudyData(){
-  const payload={format:'ptot-study-data',version:1,appVersion:'1.15',exportedAt:new Date().toISOString(),data:st};
+  const payload={format:'ptot-study-data',version:1,appVersion:'1.16',exportedAt:new Date().toISOString(),data:st};
   const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
   const url=URL.createObjectURL(blob),a=document.createElement('a'),d=new Date(),ymd=`${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}`;
   a.href=url;a.download=`ptot-study-backup-${ymd}.json`;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);

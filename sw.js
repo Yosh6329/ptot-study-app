@@ -1,4 +1,4 @@
-const CACHE='ptot-pwa-v1-15';
+const CACHE='ptot-pwa-v1-16';
 const SHELL=['./','./index.html','./manifest.webmanifest','./app-icon-192.png','./app-icon-512.png'];
 self.addEventListener('install',event=>{
   event.waitUntil(caches.open(CACHE).then(c=>c.addAll(SHELL)).then(()=>self.skipWaiting()));
