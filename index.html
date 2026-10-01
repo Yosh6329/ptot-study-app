@@ -9,7 +9,7 @@
 <meta name="apple-mobile-web-app-title" content="PT/OT国試"/>
 <link rel="manifest" href="./manifest.webmanifest"/>
 <link rel="apple-touch-icon" href="./app-icon-192.png"/>
-<title>PT/OT国試 基礎3科目 弱点診断 v1.14</title>
+<title>PT/OT国試 基礎3科目 弱点診断 v1.15</title>
 <style>
 :root{--bg:#f4f6f8;--card:#fff;--text:#15202b;--muted:#64748b;--line:#e2e8f0;--teal:#0f766e;--teal2:#115e59;--good:#15803d;--bad:#b91c1c;--warn:#b45309}
 *{box-sizing:border-box}
@@ -37,6 +37,29 @@ p{line-height:1.72;margin:8px 0}
 .source{font-size:12px;color:var(--teal2);font-weight:700;margin:8px 0}
 .figure{margin:14px 0;padding:8px;background:#fff;border:1px solid var(--line);border-radius:14px}
 .figure svg{display:block;width:100%;height:auto}
+.figure{overflow:visible}
+.figure .problem-image{display:block;width:100%;height:auto;max-height:none;object-fit:contain;border-radius:10px;cursor:zoom-in;background:#fff}
+.figure-actions{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:8px}
+.figure-action{border:1px solid #cbd5e1;background:#fff;color:#334155;border-radius:9px;padding:7px 10px;font-size:12px;font-weight:750;cursor:pointer;text-decoration:none}
+.figure-action:hover{background:#f8fafc}
+.image-modal{position:fixed;inset:0;z-index:9999;background:rgba(15,23,42,.88);display:flex;align-items:center;justify-content:center;padding:18px}
+.image-modal.hidden{display:none}
+.image-modal-card{width:min(1100px,100%);max-height:94vh;background:#fff;border-radius:14px;padding:10px;display:flex;flex-direction:column;gap:8px;box-shadow:0 20px 50px rgba(0,0,0,.35)}
+.image-modal-head{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.image-modal-caption{font-size:13px;color:#475569;font-weight:700;min-width:0}
+.image-modal-close{border:0;background:#eef2f7;color:#334155;border-radius:9px;padding:8px 11px;font-weight:800;cursor:pointer;white-space:nowrap}
+.image-modal-body{overflow:auto;text-align:center;background:#f8fafc;border-radius:10px;padding:8px}
+.image-modal-body img{display:inline-block;max-width:none;width:auto;height:auto;min-width:min(100%,720px);object-fit:contain}
+.image-modal-foot{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap}
+.term-section-note{font-size:11px;color:var(--muted);margin:2px 0 8px}
+.term-chips{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px}
+.term-chip{display:inline-flex;align-items:center;gap:6px;border:1px solid #cbd5e1;background:#f8fafc;border-radius:999px;padding:6px 9px;font-size:12px;font-weight:750;color:#334155}
+.term-chip button{border:0;background:transparent;color:var(--teal2);font-size:11px;font-weight:850;padding:0;cursor:pointer;white-space:nowrap}
+.edu-figure{margin-top:12px;border:1px solid #cbd5e1;border-radius:12px;background:#fff;padding:10px;overflow-x:auto}
+.edu-figure-title{font-size:13px;font-weight:850;margin-bottom:6px;color:#334155}
+.edu-figure svg{display:block;width:100%;min-width:620px;height:auto}
+.edu-figure-note{font-size:11px;color:var(--muted);line-height:1.6;margin-top:6px}
+.badge-danger,.badge-warn,.badge-good{white-space:nowrap;word-break:keep-all;flex-shrink:0}
 .choice{display:block;width:100%;text-align:left;padding:13px;margin:9px 0;border:1px solid #cbd5e1;background:#fff;color:var(--text);-webkit-text-fill-color:var(--text);border-radius:12px;font-size:15px;line-height:1.55;cursor:pointer}
 .choice.sel{border:2px solid var(--teal);background:#eefbf8}
 .choice.ok{border:2px solid var(--good);background:#f0fdf4}
@@ -261,7 +284,7 @@ p{line-height:1.72;margin:8px 0}
 
 
 /* v1.11 */
-/* v1.14: 第59・60回 基礎3科目96問を収録; 採点調整問題は診断から除外 */
+/* v1.15: 画像拡大・公式原図導線、重点復習バッジ折返し防止、用語整理拡張、検証済みSVG解説図の試験導入 */
 .practice-select .selectbtn,.practice-axis .selectbtn{position:relative}
 .practice-btn-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
 .practice-btn-title{min-width:0;flex:1}
@@ -288,7 +311,7 @@ p{line-height:1.72;margin:8px 0}
 </head>
 <body>
 <div class="app">
-  <div class="top"><div class="brand">PT/OT国試 基礎3科目</div><span class="version">v1.14 第59・60回96問版</span></div>
+  <div class="top"><div class="brand">PT/OT国試 基礎3科目</div><span class="version">v1.15 第59・60回96問版</span></div>
   <div id="screen"></div>
 </div>
 <div class="nav" id="nav"><div class="navin">
@@ -314,12 +337,76 @@ function scrollTopNow(){ requestAnimationFrame(()=>window.scrollTo({top:0,left:0
 
 function problemFigureHtml(q){
   if(q.problemImage){
-    return `<div class="figure"><img src="${q.problemImage}" alt="${q.problemImageCaption||'問題図'}" style="display:block;width:100%;height:auto;border-radius:10px"><div class="small muted" style="text-align:center;margin-top:6px">${q.problemImageCaption||''}${q.officialFigureUrl?`<br><a class="figure-source-link" href="${q.officialFigureUrl}" target="_blank" rel="noopener">出典を確認</a>`:''}</div></div>`;
+    const imgId=`problemImg-${q.id}`;
+    return `<div class="figure"><img id="${imgId}" class="problem-image" src="${q.problemImage}" alt="${q.problemImageCaption||'問題図'}" data-official="${q.officialFigureUrl||''}" onclick="openImageModal(this)"><div class="small muted" style="text-align:center;margin-top:6px">${q.problemImageCaption||''}</div><div class="figure-actions"><button class="figure-action" onclick="openImageModal(document.getElementById('${imgId}'))">画像を拡大</button>${q.officialFigureUrl?`<a class="figure-action" href="${q.officialFigureUrl}" target="_blank" rel="noopener">公式原図を開く</a>`:''}</div></div>`;
   }
   if(q.officialFigureUrl){
-    return `<div class="figure" style="padding:12px"><div class="small muted">この問題の図は現在アプリ内表示の準備中です。</div></div>`;
+    return `<div class="figure" style="padding:12px"><div class="small muted">この問題の図は現在アプリ内表示の準備中です。</div><div class="figure-actions"><a class="figure-action" href="${q.officialFigureUrl}" target="_blank" rel="noopener">公式原図を開く</a></div></div>`;
   }
   return '';
+}
+function openImageModal(img){
+  if(!img)return;
+  let modal=document.getElementById('imageModal');
+  if(!modal){
+    modal=document.createElement('div');
+    modal.id='imageModal';modal.className='image-modal hidden';
+    modal.innerHTML=`<div class="image-modal-card" role="dialog" aria-modal="true"><div class="image-modal-head"><div id="imageModalCaption" class="image-modal-caption"></div><button class="image-modal-close" onclick="closeImageModal()">閉じる</button></div><div class="image-modal-body"><img id="imageModalImg" alt="拡大画像"></div><div id="imageModalFoot" class="image-modal-foot"></div></div>`;
+    modal.addEventListener('click',e=>{if(e.target===modal)closeImageModal();});
+    document.body.appendChild(modal);
+  }
+  const zoom=document.getElementById('imageModalImg');
+  zoom.src=img.src;zoom.alt=img.alt||'拡大画像';
+  document.getElementById('imageModalCaption').textContent=img.alt||'';
+  const official=img.dataset.official||'';
+  document.getElementById('imageModalFoot').innerHTML=official?`<a class="figure-action" href="${official}" target="_blank" rel="noopener">公式原図を開く</a>`:'';
+  modal.classList.remove('hidden');document.body.style.overflow='hidden';
+}
+function closeImageModal(){
+  const modal=document.getElementById('imageModal');if(modal)modal.classList.add('hidden');document.body.style.overflow='';
+}
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeImageModal();});
+
+function explanationFigureHtml(q){
+  if(q.id!=='59A52')return '';
+  return `<div class="edu-figure"><div class="edu-figure-title">サルコメアの帯とフィラメント分布</div>
+  <svg viewBox="0 0 760 300" role="img" aria-label="サルコメア内のA帯、I帯、H帯とアクチン・ミオシンの分布">
+    <rect x="48" y="48" width="664" height="160" rx="12" fill="#f8fafc" stroke="#cbd5e1"/>
+    <rect x="235" y="65" width="290" height="110" rx="8" fill="#dbeafe" opacity=".75"/>
+    <rect x="315" y="65" width="130" height="110" rx="8" fill="#bfdbfe" opacity=".95"/>
+    <line x1="85" y1="68" x2="85" y2="185" stroke="#334155" stroke-width="6"/>
+    <line x1="675" y1="68" x2="675" y2="185" stroke="#334155" stroke-width="6"/>
+    <line x1="380" y1="80" x2="380" y2="174" stroke="#64748b" stroke-width="3" stroke-dasharray="5 5"/>
+    <g stroke="#dc2626" stroke-width="8" stroke-linecap="round">
+      <line x1="85" y1="105" x2="315" y2="105"/><line x1="85" y1="145" x2="315" y2="145"/>
+      <line x1="675" y1="105" x2="445" y2="105"/><line x1="675" y1="145" x2="445" y2="145"/>
+    </g>
+    <g stroke="#2563eb" stroke-width="14" stroke-linecap="round">
+      <line x1="235" y1="125" x2="525" y2="125"/>
+    </g>
+    <text x="70" y="36" font-size="18" font-weight="700" fill="#334155">Z線</text>
+    <text x="660" y="36" font-size="18" font-weight="700" fill="#334155">Z線</text>
+    <text x="367" y="62" font-size="16" font-weight="700" fill="#475569">M線</text>
+    <text x="350" y="198" font-size="17" font-weight="800" fill="#1e3a8a">H帯</text>
+    <text x="345" y="222" font-size="14" fill="#475569">ミオシンのみ</text>
+    <text x="337" y="255" font-size="17" font-weight="800" fill="#1e3a8a">A帯</text>
+    <line x1="235" y1="264" x2="525" y2="264" stroke="#1e3a8a" stroke-width="3"/>
+    <line x1="235" y1="257" x2="235" y2="271" stroke="#1e3a8a" stroke-width="3"/><line x1="525" y1="257" x2="525" y2="271" stroke="#1e3a8a" stroke-width="3"/>
+    <text x="115" y="198" font-size="17" font-weight="800" fill="#7c2d12">I帯</text><text x="570" y="198" font-size="17" font-weight="800" fill="#7c2d12">I帯</text>
+    <text x="104" y="222" font-size="14" fill="#475569">アクチンのみ</text><text x="559" y="222" font-size="14" fill="#475569">アクチンのみ</text>
+    <g transform="translate(55,285)"><line x1="0" y1="0" x2="35" y2="0" stroke="#dc2626" stroke-width="7" stroke-linecap="round"/><text x="44" y="5" font-size="14" fill="#334155">アクチン（細いフィラメント）</text><line x1="275" y1="0" x2="310" y2="0" stroke="#2563eb" stroke-width="12" stroke-linecap="round"/><text x="320" y="5" font-size="14" fill="#334155">ミオシン（太いフィラメント）</text></g>
+  </svg><div class="edu-figure-note">A帯はミオシンフィラメントの全長に相当し、中央のH帯はアクチンと重ならないためミオシンのみです。I帯はアクチンのみです。</div></div>`;
+}
+
+function keyTermsHtml(q){
+  const defined=(q.glossary||[]).map(g=>g.term);
+  const terms=[];
+  [...defined,...(q.secondary||[])].forEach(t=>{if(t&&!terms.includes(t))terms.push(t);});
+  const extras=terms.filter(t=>!defined.includes(t)).slice(0,6);
+  const definedHtml=(q.glossary||[]).map(g=>`<div class="gloss-item"><b>${esc(g.term)}</b><div class="small">${esc(g.desc)}</div>${lookupButton(g.term,q.id)}</div>`).join('');
+  const extraHtml=extras.length?`<div class="term-section-note">問題文・選択肢・解説と関連するキーワード</div><div class="term-chips">${extras.map(t=>{const enc=encodeURIComponent(t);return `<span class="term-chip">${esc(t)}<button onclick="addLookup(decodeURIComponent('${enc}'),'${q.id}',this)">＋保存</button></span>`}).join('')}</div>`:'';
+  if(!definedHtml&&!extraHtml)return '';
+  return `<div class="section-box" style="background:#fff;border:1px solid #dbe4ee"><h3>用語整理</h3>${definedHtml?`<div class="gloss-grid">${definedHtml}</div>`:''}${extraHtml}</div>`;
 }
 
 
@@ -821,17 +908,17 @@ function answer(){
   document.querySelectorAll('.choice').forEach(el=>{const id=el.dataset.id;if(q.answers.includes(id))el.classList.add('ok');if(ses.selected.has(id)&&!q.answers.includes(id))el.classList.add('ng');});
 
   const optionHtml=ses.display.map((o,idx)=>`<div class="option-ex"><b>${q.answers.includes(o.id)?'✓ ':''}${idx+1}. ${o.text}</b><br/>${q.option_explanations[o.id]}</div>`).join('');
-  const gloss=(q.glossary||[]).map(g=>`<div class="gloss-item"><b>${g.term}</b><div class="small">${g.desc}</div>${lookupButton(g.term,q.id)}</div>`).join('');
+  const termHtml=keyTermsHtml(q);
 
   document.getElementById('answerBtn').outerHTML=`
     <div class="explain">
       <div class="explain-result ${correct?'good':'bad'}"><h2 class="${correct?'result-good':'result-bad'}" style="margin:0">${correct?'正解':'不正解'}</h2></div>
-      <div class="section-box section-main"><h3>解説</h3><p>${q.why}</p></div>
+      <div class="section-box section-main"><h3>解説</h3><p>${q.why}</p>${explanationFigureHtml(q)}</div>
       <div class="section-box section-options"><h3>各選択肢</h3>${optionHtml}</div>
       <div class="section-box section-related"><h3>関連する知識</h3><div>${q.related}</div></div>
       ${(q.exam_links&&q.exam_links.length)?`<div class="section-box section-exam"><h3>国試で一緒に押さえる</h3><ul style="margin:8px 0 0 20px;padding:0">${q.exam_links.map(x=>`<li style="margin:5px 0">${x}</li>`).join('')}</ul></div>`:''}
       <div class="section-box section-tip"><h3>覚えておくポイント</h3><div>${q.tip}</div></div>
-      ${gloss?`<div class="section-box" style="background:#fff;border:1px solid #dbe4ee"><h3>用語整理</h3><div class="gloss-grid">${gloss}</div></div>`:''}
+      ${termHtml}
       <div class="section-box section-answer"><h3>公式正答</h3><div>第${q.round||60}回 ${q.source_session}${q.source_no}：${q.official_answers.join('・')}</div>${q.official_note?`<div class="small muted" style="margin-top:6px">${q.official_note}</div>`:''}</div>
     </div>
     <button class="btn" style="margin-top:12px" onclick="nextQ()">${ses.i+1===ses.ids.length?'結果を見る':'次の問題'}</button>
@@ -973,7 +1060,7 @@ function diagnosisReviewQuestion(id,mode){
   const q=qBy(id),recs=latestDiagnosisRecords(),a=recs.find(x=>x.id===id);if(!q||!a){diagnosisReview(mode);return;}
   const selected=new Set(a.selected||[]);
   const optionHtml=q.options.map((o,idx)=>`<div class="option-ex"><b>${q.answers.includes(o.id)?'✓ ':''}${idx+1}. ${o.text}${selected.has(o.id)?'　<span class="small">← あなたの回答</span>':''}</b><br/>${q.option_explanations[o.id]}</div>`).join('');
-  const gloss=(q.glossary||[]).map(g=>`<div class="gloss-item"><b>${g.term}</b><div class="small">${g.desc}</div>${lookupButton(g.term,q.id)}</div>`).join('');
+  const termHtml=keyTermsHtml(q);
   S.innerHTML=`<div class="card">
     <button class="backlink" onclick="diagnosisReview('${mode}')">← 一覧へ戻る</button>
     <div class="source">${q.source}</div>
@@ -981,12 +1068,12 @@ function diagnosisReviewQuestion(id,mode){
     ${problemFigureHtml(q)}
     <div class="explain">
       <div class="explain-result ${a.correct?'good':'bad'}"><h2 class="${a.correct?'result-good':'result-bad'}" style="margin:0">${a.correct?'正解':'不正解'}</h2></div>
-      <div class="section-box section-main"><h3>解説</h3><p>${q.why}</p></div>
+      <div class="section-box section-main"><h3>解説</h3><p>${q.why}</p>${explanationFigureHtml(q)}</div>
       <div class="section-box section-options"><h3>各選択肢</h3>${optionHtml}</div>
       <div class="section-box section-related"><h3>関連する知識</h3><div>${q.related}</div></div>
       ${(q.exam_links&&q.exam_links.length)?`<div class="section-box section-exam"><h3>国試で一緒に押さえる</h3><ul style="margin:8px 0 0 20px;padding:0">${q.exam_links.map(x=>`<li style="margin:5px 0">${x}</li>`).join('')}</ul></div>`:''}
       <div class="section-box section-tip"><h3>覚えておくポイント</h3><div>${q.tip}</div></div>
-      ${gloss?`<div class="section-box" style="background:#fff;border:1px solid #dbe4ee"><h3>用語整理</h3><div class="gloss-grid">${gloss}</div></div>`:''}
+      ${termHtml}
     </div>
   </div>`;
   NAV.classList.remove('hide');scrollTopNow();
@@ -1036,7 +1123,7 @@ function lookupPage(){
 }
 
 function exportStudyData(){
-  const payload={format:'ptot-study-data',version:1,appVersion:'1.14',exportedAt:new Date().toISOString(),data:st};
+  const payload={format:'ptot-study-data',version:1,appVersion:'1.15',exportedAt:new Date().toISOString(),data:st};
   const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
   const url=URL.createObjectURL(blob),a=document.createElement('a'),d=new Date(),ymd=`${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}`;
   a.href=url;a.download=`ptot-study-backup-${ymd}.json`;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
