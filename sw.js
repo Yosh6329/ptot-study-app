@@ -1,4 +1,4 @@
-const CACHE='ptot-pwa-v1-22';
+const CACHE='ptot-pwa-v1-24';
 const SHELL=['./','./index.html','./manifest.webmanifest','./app-icon-192.png','./app-icon-512.png'];
 const OPTIONAL_IMAGES=["./images/54B54.jpg", "./images/54B59.jpg", "./images/54B72.jpg", "./images/55A59.jpg", "./images/56A60.jpg", "./images/56B71.jpg", "./images/57A60.jpg", "./images/57A70.jpg", "./images/57B59.jpg", "./images/58A71.jpg", "./images/58B59.webp", "./images/59A60.jpg", "./images/60A51.jpg", "./images/60B56.jpg"];
 self.addEventListener('install',event=>{event.waitUntil(caches.open(CACHE).then(async c=>{await c.addAll(SHELL);for(const u of OPTIONAL_IMAGES){try{const r=await fetch(u);if(r.ok)await c.put(u,r);}catch(e){}}}).then(()=>self.skipWaiting()));});
