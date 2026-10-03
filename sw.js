@@ -1,4 +1,4 @@
-const CACHE='ptot-pwa-v1-27';
+const CACHE='ptot-pwa-v1-27-icon1';
 const SHELL=["./","./index.html","./manifest.webmanifest","./app-icon-192.png","./app-icon-512.png","./images/53B72.jpg","./images/54B54.jpg","./images/54B59.jpg","./images/54B72.jpg","./images/55A59.jpg","./images/56A60.jpg","./images/56B71.jpg","./images/57A60.jpg","./images/57A70.jpg","./images/57B59.jpg","./images/58A71.jpg","./images/58B59.jpg","./images/59A60.jpg","./images/60A51.jpg","./images/60B56.jpg","./images/61A58.png","./images/61A72.png"];
 self.addEventListener('install',event=>{event.waitUntil(caches.open(CACHE).then(c=>c.addAll(SHELL)).then(()=>self.skipWaiting()));});
 self.addEventListener('activate',event=>{event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim()));});
