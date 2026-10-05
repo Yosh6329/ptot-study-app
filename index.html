@@ -413,6 +413,110 @@ p{line-height:1.72;margin:8px 0}
 .subject-detail-btn .go{font-size:12px;font-weight:850;color:var(--teal2);white-space:nowrap}
 .domain-card .domain-mastery.hidden{display:none}
 
+
+/* v1.29 weakness analysis layout refinement */
+.radar-clickable{cursor:pointer;border-radius:14px;transition:background .15s ease}
+.radar-clickable:hover{background:#f8fafc}
+.subject-analysis-card{border-top:5px solid var(--subject-color);overflow:hidden}
+.subject-analysis-card .weak-subject-head{margin-bottom:2px}
+.subject-analysis-card .radar-note{text-align:center;margin:4px 0 10px}
+.subject-analysis-card .subject-detail-action{margin-top:8px}
+
+.domain-grid{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:12px;
+  margin-top:12px;
+}
+.domain-card{
+  appearance:none;
+  -webkit-appearance:none;
+  width:100%;
+  box-sizing:border-box;
+  display:block;
+  text-align:left;
+  border:1px solid #dbe4ea;
+  border-top:4px solid #cbd5e1;
+  background:#fff;
+  border-radius:16px;
+  padding:16px;
+  color:var(--text);
+  cursor:pointer;
+  box-shadow:0 2px 8px rgba(15,23,42,.05);
+  transition:transform .12s ease,box-shadow .12s ease,border-color .12s ease;
+}
+.domain-card:hover{
+  transform:translateY(-1px);
+  box-shadow:0 5px 14px rgba(15,23,42,.08);
+  border-color:#b8c7d2;
+}
+.domain-card.priority{border-top-color:#dc2626}
+.domain-card.high{border-top-color:#ea580c}
+.domain-card.mid{border-top-color:#f59e0b}
+.domain-card.reached{border-top-color:#d97706}
+.domain-card.stable{border-top-color:#2563eb}
+.domain-card.mastered{border-top-color:#059669}
+.domain-card-main{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:12px;
+  min-width:0;
+}
+.domain-card-title{
+  min-width:0;
+  font-size:16px;
+  line-height:1.45;
+  font-weight:850;
+}
+.domain-card .pill{
+  flex:0 0 auto;
+  white-space:nowrap;
+}
+.domain-mastery{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:12px;
+  margin-top:13px;
+  padding:10px 12px;
+  border-radius:11px;
+  background:#f8fafc;
+  font-size:12px;
+  color:#64748b;
+}
+.domain-mastery b{
+  font-size:19px;
+  color:#0f172a;
+}
+.domain-progress{
+  margin-top:12px;
+  padding-top:11px;
+  border-top:1px solid #edf2f7;
+  font-size:12px;
+  line-height:1.55;
+  color:#64748b;
+}
+.domain-card-go{
+  display:flex;
+  justify-content:flex-end;
+  margin-top:9px;
+  color:var(--teal2);
+  font-size:12px;
+  font-weight:800;
+}
+.subject-detail-intro{
+  display:flex;
+  align-items:center;
+  gap:9px;
+  margin-bottom:8px;
+}
+@media(max-width:640px){
+  .domain-grid{grid-template-columns:1fr;gap:10px}
+  .domain-card{padding:15px}
+  .domain-card-title{font-size:15px}
+}
+
 </style>
 </head>
 <body>
@@ -733,20 +837,18 @@ function domainCard(x){
   if(!x.eligible){
     dataText=x.seen<5?'まだ回答データが少ない分野です':`あと${x.needed}問で学習状況を判定できます`;
   }else if(x.seen<x.highRequired){
-    dataText='学習状況を判定できます';
+    dataText='学習状況を判定できます。さらに回答すると、より詳しく確認できます。';
   }else{
-    dataText='十分な回答データがあります';
+    dataText='判定に必要な回答データは十分に集まっています。';
   }
   return `<button class="domain-card ${statusClass}" onclick="openWeaknessDomain('${x.id}')">
     <div class="domain-card-main">
-      <div>
-        <b>${esc(x.label)}</b>
-        <div class="small muted">${esc(x.subject)}</div>
-      </div>
+      <div class="domain-card-title">${esc(x.label)}</div>
       <span class="pill ${statusClass}">${x.status}</span>
     </div>
     ${x.eligible?`<div class="domain-mastery"><span>現在習熟度</span><b>${x.mastery}%</b></div>`:''}
     <div class="domain-progress">${dataText}</div>
+    <div class="domain-card-go">詳しく見る →</div>
   </button>`;
 }
 function startDomain(key){
@@ -1334,33 +1436,59 @@ function screeningResultHtml(records,limit=5){
   if(!rows.length)return '<div class="lookup-empty">今回のチェックでは、優先して確認する候補は目立ちませんでした。初回結果だけで確定せず、通常演習や確認テストを続けてください。</div>';
   return `<div class="result-weak-grid">${rows.map(x=>`<button class="result-weak-card" onclick="startDomain('${x.id}')"><div class="result-weak-top"><div><span class="result-weak-title">${esc(x.label)}</span></div><span class="result-weak-score">${x.pct}%</span></div><div class="result-weak-path">${esc(x.subject)} · ${x.screen}</div><div class="result-weak-action">この領域を追加確認する →</div></button>`).join('')}</div>`;
 }
-function weaknessRadarSvg(subject){
+function weaknessRadarSvg(subject,showChips=false){
   const theme=subjectTheme(subject),rows=weaknessDomainScores().filter(x=>x.subject===subject),n=rows.length;
   if(n<3)return '<p class="muted">表示できる分野がありません。</p>';
   const cx=210,cy=170,r=105;
   const pt=(i,val,rr=r)=>{const ang=-Math.PI/2+i*2*Math.PI/n,rad=rr*(val/100);return [cx+rad*Math.cos(ang),cy+rad*Math.sin(ang)];};
   const ring=f=>rows.map((_,i)=>pt(i,100,r*f).join(',')).join(' ');
   const vals=rows.map(x=>x.eligible?x.mastery:null);
-  const sectors=rows.map((x,i)=>{const j=(i+1)%n,a=vals[i],b=vals[j];if(a===null||b===null)return'';const p1=pt(i,a),p2=pt(j,b);return `<polygon points="${cx},${cy} ${p1[0]},${p1[1]} ${p2[0]},${p2[1]}" fill="${theme.fill}"/>`;}).join('');
-  const edges=rows.map((x,i)=>{const j=(i+1)%n,a=vals[i],b=vals[j];if(a===null||b===null)return'';const p1=pt(i,a),p2=pt(j,b);return `<line x1="${p1[0]}" y1="${p1[1]}" x2="${p2[0]}" y2="${p2[1]}" stroke="${theme.color}" stroke-width="2.5"/>`;}).join('');
+  const sectors=rows.map((x,i)=>{
+    const j=(i+1)%n,a=vals[i],b=vals[j];
+    if(a===null||b===null)return'';
+    const p1=pt(i,a),p2=pt(j,b);
+    return `<polygon points="${cx},${cy} ${p1[0]},${p1[1]} ${p2[0]},${p2[1]}" fill="${theme.fill}"/>`;
+  }).join('');
+  const edges=rows.map((x,i)=>{
+    const j=(i+1)%n,a=vals[i],b=vals[j];
+    if(a===null||b===null)return'';
+    const p1=pt(i,a),p2=pt(j,b);
+    return `<line x1="${p1[0]}" y1="${p1[1]}" x2="${p2[0]}" y2="${p2[1]}" stroke="${theme.color}" stroke-width="2.5"/>`;
+  }).join('');
   const axes=rows.map((x,i)=>{
     const [x1,y1]=pt(i,100),[lx,ly]=pt(i,100,n>=9?132:140),v=vals[i],p=v===null?null:pt(i,v),anchor=lx<cx-18?'end':lx>cx+18?'start':'middle';
     const label=x.eligible?`${v}%・${x.status}`:x.status;
-    return `<line x1="${cx}" y1="${cy}" x2="${x1}" y2="${y1}" stroke="#d6dee8"/>${p?`<circle cx="${p[0]}" cy="${p[1]}" r="4.5" fill="#fff" stroke="${theme.color}" stroke-width="2.5"/>`:''}<g class="axis-label" onclick="openWeaknessDomain('${x.id}')"><text x="${lx}" y="${ly}" text-anchor="${anchor}" dominant-baseline="middle" font-size="${n>=9?8.4:10}" font-weight="700" fill="#334155">${esc(x.label)}</text><text class="radar-score-label" x="${lx}" y="${ly+13}" text-anchor="${anchor}" dominant-baseline="middle">${label}</text></g>`;
+    return `<line x1="${cx}" y1="${cy}" x2="${x1}" y2="${y1}" stroke="#d6dee8"/>
+      ${p?`<circle cx="${p[0]}" cy="${p[1]}" r="4.5" fill="#fff" stroke="${theme.color}" stroke-width="2.5"/>`:''}
+      <g class="axis-label" onclick="event.stopPropagation();openWeaknessDomain('${x.id}')">
+        <text x="${lx}" y="${ly}" text-anchor="${anchor}" dominant-baseline="middle" font-size="${n>=9?8.4:10}" font-weight="700" fill="#334155">${esc(x.label)}</text>
+        <text class="radar-score-label" x="${lx}" y="${ly+13}" text-anchor="${anchor}" dominant-baseline="middle">${label}</text>
+      </g>`;
   }).join('');
-  const chips=rows.map(x=>`<button class="axis-chip" onclick="openWeaknessDomain('${x.id}')"><b>${esc(x.label)}</b><div class="axis-chip-meta"><span>${x.eligible?`${x.mastery}%・${x.status}`:x.status}</span><span class="go">詳細 →</span></div></button>`).join('');
-  return `<div class="radar-wrap"><svg class="radar" viewBox="0 0 420 350">${[.25,.5,.6,.75,1].map(f=>`<polygon points="${ring(f)}" fill="none" stroke="${f===.6?'#f59e0b':'#e2e8f0'}" ${f===.6?'stroke-dasharray="4 3"':''}/>`).join('')}${sectors}${edges}${axes}</svg></div><div class="radar-note">判定に必要な回答データが集まった分野だけ、習熟度を表示しています。</div><div class="axis-grid">${chips}</div>`;
+  const chips=showChips?rows.map(x=>`<button class="axis-chip" onclick="openWeaknessDomain('${x.id}')"><b>${esc(x.label)}</b><div class="axis-chip-meta"><span>${x.eligible?`${x.mastery}%・${x.status}`:x.status}</span><span class="go">詳細 →</span></div></button>`).join(''):'';
+  return `<div class="radar-wrap radar-clickable" onclick="openSubjectWeakness('${subject}')">
+      <svg class="radar" viewBox="0 0 420 350">
+        ${[.25,.5,.6,.75,1].map(f=>`<polygon points="${ring(f)}" fill="none" stroke="${f===.6?'#f59e0b':'#e2e8f0'}" ${f===.6?'stroke-dasharray="4 3"':''}/>`).join('')}
+        ${sectors}${edges}${axes}
+      </svg>
+    </div>
+    <div class="radar-note">グラフをタップすると${esc(subject)}の詳細へ進めます。各項目名をタップすると、その分野を直接確認できます。</div>
+    ${showChips?`<div class="axis-grid">${chips}</div>`:''}`;
 }
 function openSubjectWeakness(subject){
   const th=subjectTheme(subject);
   const rows=weaknessDomainScores().filter(x=>x.subject===subject);
-  S.innerHTML=`<div class="card"><button class="backlink" onclick="weak()">← 弱点分析へ戻る</button>
-    <div class="weak-subject-head"><span class="weak-subject-badge" style="background:${th.soft};color:${th.color}">${esc(subject)}</span><h1 style="margin:0">${esc(subject)}の学習状況</h1></div>
-    <p class="small muted">判定に必要な回答データが集まった分野だけ習熟度を表示します。データが少ない分野は、確認テストや通常演習を続けてみましょう。</p>
-    ${weaknessRadarSvg(subject)}
+  S.innerHTML=`<div class="card">
+    <button class="backlink" onclick="weak()">← 弱点分析へ戻る</button>
+    <div class="subject-detail-intro">
+      <span class="weak-subject-badge" style="background:${th.soft};color:${th.color}">${esc(subject)}</span>
+      <h1 style="margin:0">${esc(subject)}の詳細</h1>
+    </div>
+    <p class="muted">分野ごとの学習状況を確認できます。データが少ない分野では習熟度を表示せず、もう少し回答が必要であることだけを示します。</p>
   </div>
-  <div class="card"><h2>分野別の学習状況</h2>
-    ${rows.map(domainCard).join('')}
+  <div class="card">
+    <h2>分野別の学習状況</h2>
+    <div class="domain-grid">${rows.map(domainCard).join('')}</div>
   </div>`;
   NAV.classList.remove('hide');nav('weak');scrollTopNow();
 }
@@ -1542,12 +1670,17 @@ function startExactQuestion(id){if(!qBy(id))return;start([id],'practice');}
 
 function weak(){
   if(!st.diagnosed){home();return;}
+  const subjects=Object.keys(ANALYTICS);
   scrollTopNow();
   S.innerHTML=`<div class="card"><h1>弱点分析</h1>
     <p class="muted">これまでに解いた問題から、今の理解状況と、次に優先して勉強したい分野を確認できます。</p>
     <div class="note"><b>学習上の基準到達ライン：60%</b><br>まずは60%に届いていない分野を優先して確認し、60%を超えた分野も安定するまで定着させていきましょう。</div>
     <div class="threshold-grid">
-      <div class="threshold-item"><b>〜49%</b>重点対策</div><div class="threshold-item"><b>50〜59%</b>要対策</div><div class="threshold-item"><b>60〜69%</b>基準到達・要定着</div><div class="threshold-item"><b>70〜79%</b>安定</div><div class="threshold-item"><b>80%〜</b>定着</div>
+      <div class="threshold-item"><b>〜49%</b>重点対策</div>
+      <div class="threshold-item"><b>50〜59%</b>要対策</div>
+      <div class="threshold-item"><b>60〜69%</b>基準到達・要定着</div>
+      <div class="threshold-item"><b>70〜79%</b>安定</div>
+      <div class="threshold-item"><b>80%〜</b>定着</div>
     </div>
     ${subjectSummaryHtml()}
     <div class="analysis-guide"><b>問題を続けて解くと、弱点分析がより詳しくなります</b><p>教科書や講義資料、国家試験対策本などで学習したあとに、確認テストや通常演習を続けてみましょう。回答データが増えると、現在の理解状況をより確かめやすくなります。</p><button class="btn soft" onclick="diagnosisMenu(false)">確認テストを続ける</button></div>
@@ -1558,14 +1691,17 @@ function weak(){
     ${weakTopHtml(3)}
   </div>
 
-  <div class="card"><h2>分野ごとの詳細を見る</h2>
-    <p class="small muted">詳しく確認したい科目を選んでください。</p>
-    <div class="subject-detail-nav">
-      <button class="subject-detail-btn" onclick="openSubjectWeakness('解剖学')"><div><b>解剖学</b><span class="sub">分野別の学習状況を見る</span></div><span class="go">詳しく見る →</span></button>
-      <button class="subject-detail-btn" onclick="openSubjectWeakness('生理学')"><div><b>生理学</b><span class="sub">分野別の学習状況を見る</span></div><span class="go">詳しく見る →</span></button>
-      <button class="subject-detail-btn" onclick="openSubjectWeakness('運動学')"><div><b>運動学</b><span class="sub">分野別の学習状況を見る</span></div><span class="go">詳しく見る →</span></button>
-    </div>
-  </div>`;
+  ${subjects.map(s=>{
+    const th=subjectTheme(s);
+    return `<div class="card subject-analysis-card" style="--subject-color:${th.color};--subject-soft:${th.soft}">
+      <div class="weak-subject-head">
+        <span class="weak-subject-badge">${esc(s)}</span>
+        <h2>${esc(s)}の学習状況</h2>
+      </div>
+      ${weaknessRadarSvg(s,false)}
+      <button class="btn secondary subject-detail-action" onclick="openSubjectWeakness('${s}')">${esc(s)}の詳細を見る →</button>
+    </div>`;
+  }).join('')}`;
   nav('weak');scrollTopNow();
 }
 
