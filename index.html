@@ -9,7 +9,7 @@
 <meta name="apple-mobile-web-app-title" content="PT/OT国試"/>
 <link rel="manifest" href="./manifest.webmanifest"/>
 <link rel="apple-touch-icon" href="./app-icon-192.png"/>
-<title>PT/OT国試 基礎3科目 弱点判別アプリ v1.29</title>
+<title>PT/OT国試 基礎3科目 弱点判別アプリ v1.30.1</title>
 <style>
 :root{--bg:#f4f6f8;--card:#fff;--text:#15202b;--muted:#64748b;--line:#e2e8f0;--teal:#0f766e;--teal2:#115e59;--good:#15803d;--bad:#b91c1c;--warn:#b45309}
 *{box-sizing:border-box}
@@ -517,11 +517,190 @@ p{line-height:1.72;margin:8px 0}
   .domain-card-title{font-size:15px}
 }
 
+
+/* v1.30 visual refresh */
+:root{
+  --bg:#f2f7f6;
+  --card:#ffffff;
+  --line:#dbe7e5;
+  --teal:#0f766e;
+  --teal2:#115e59;
+}
+body{
+  background:
+    radial-gradient(circle at 50% -120px, rgba(15,118,110,.10), transparent 330px),
+    linear-gradient(180deg,#eef7f5 0%,#f6f9f8 38%,#f2f6f5 100%);
+  background-attachment:fixed;
+}
+.card{
+  border-color:#dce8e6;
+  box-shadow:0 4px 16px rgba(15,74,68,.045);
+}
+.hero{
+  background:linear-gradient(135deg,#ffffff 0%,#f4fbf9 48%,#e8f7f3 100%);
+  border-color:#cfe7e2;
+}
+.version{
+  background:#dff3ef;
+  border:1px solid #c4e7df;
+}
+.nav{
+  background:rgba(249,253,252,.95);
+  border-top-color:#d4e4e1;
+}
+.btn.secondary{
+  background:#fbfefd;
+}
+.btn.soft{
+  background:#e8f6f3;
+}
+
+/* Subject summary cards */
+.subject-score{
+  box-shadow:0 2px 8px rgba(15,23,42,.035);
+}
+.subject-score.subject-anatomy{
+  background:linear-gradient(145deg,#ffffff 15%,#eef5ff 100%);
+  border-color:#d7e5fb;
+}
+.subject-score.subject-physiology{
+  background:linear-gradient(145deg,#ffffff 15%,#edf9f4 100%);
+  border-color:#d2ecdf;
+}
+.subject-score.subject-kinesiology{
+  background:linear-gradient(145deg,#ffffff 15%,#fff6e9 100%);
+  border-color:#f2dfc3;
+}
+.subject-score.subject-anatomy .meter>span{background:#2563eb}
+.subject-score.subject-physiology .meter>span{background:#059669}
+.subject-score.subject-kinesiology .meter>span{background:#d97706}
+
+/* Weakness-analysis subject panels */
+.subject-analysis-card{
+  background:linear-gradient(160deg,#ffffff 45%,var(--subject-soft) 125%);
+  border-color:#dce8e6;
+  border-top-color:var(--subject-color);
+}
+.subject-analysis-card .weak-subject-head{
+  padding:3px 1px 7px;
+}
+.subject-analysis-card .radar-wrap{
+  background:rgba(255,255,255,.72);
+  border:1px solid rgba(203,213,225,.58);
+  border-radius:16px;
+  padding:4px;
+}
+.subject-analysis-card .radar-note{
+  color:#526a68;
+}
+.subject-analysis-card .subject-detail-action{
+  background:rgba(255,255,255,.82);
+}
+
+/* Compact analysis elements */
+.analysis-guide{
+  background:linear-gradient(135deg,#f3fbf8,#eaf8f4);
+  border-color:#bfe2da;
+}
+.threshold-item{
+  background:#fbfefd;
+  border-color:#dce8e6;
+}
+.home-weak-card{
+  background:linear-gradient(155deg,#fff 60%,#f0faf7 120%);
+}
+.weak-action{
+  box-shadow:0 2px 7px rgba(15,74,68,.035);
+}
+
+/* Subject detail cards stay clean, with softer surrounding tone */
+.domain-grid{
+  gap:13px;
+}
+.domain-card{
+  border-color:#dce6e4;
+  box-shadow:0 3px 10px rgba(15,74,68,.05);
+}
+.domain-card:hover{
+  border-color:#bdd6d1;
+  box-shadow:0 6px 16px rgba(15,74,68,.075);
+}
+.domain-mastery{
+  background:#f5f9f8;
+}
+
+/* Usage screen */
+.usage-key{
+  background:linear-gradient(135deg,#f4fbf9,#eaf8f4);
+}
+.how-step{
+  border-color:#dce8e6;
+  box-shadow:0 2px 7px rgba(15,74,68,.025);
+}
+.usage-science{
+  background:#f7fbfa;
+  border-color:#d6e5e2;
+}
+.conf-meaning>div{
+  background:#fff;
+  border-color:#dce8e6;
+}
+
+@media(max-width:640px){
+  body{
+    background:
+      radial-gradient(circle at 50% -80px, rgba(15,118,110,.10), transparent 250px),
+      linear-gradient(180deg,#eef7f5 0%,#f7f9f8 34%,#f2f6f5 100%);
+  }
+}
+
+
+/* v1.30.1 subject summary -> graph navigation */
+.subject-score{
+  appearance:none;
+  -webkit-appearance:none;
+  width:100%;
+  text-align:left;
+  font:inherit;
+  color:inherit;
+  cursor:pointer;
+  position:relative;
+  transition:transform .12s ease,box-shadow .12s ease,border-color .12s ease;
+}
+.subject-score:hover{
+  transform:translateY(-1px);
+  box-shadow:0 5px 14px rgba(15,74,68,.08);
+}
+.subject-score:focus-visible{
+  outline:3px solid rgba(15,118,110,.22);
+  outline-offset:2px;
+}
+.subject-jump-hint{
+  display:flex;
+  justify-content:flex-end;
+  align-items:center;
+  margin-top:8px;
+  font-size:11px;
+  font-weight:850;
+  color:var(--teal2);
+}
+.subject-analysis-card{
+  scroll-margin-top:18px;
+}
+.subject-analysis-card.jump-focus{
+  animation:subjectJumpFocus 1.15s ease;
+}
+@keyframes subjectJumpFocus{
+  0%{box-shadow:0 0 0 0 rgba(15,118,110,0)}
+  28%{box-shadow:0 0 0 4px rgba(15,118,110,.20),0 8px 22px rgba(15,74,68,.08)}
+  100%{box-shadow:0 4px 16px rgba(15,74,68,.045)}
+}
+
 </style>
 </head>
 <body>
 <div class="app">
-  <div class="top"><div class="brand">PT/OT国試 基礎3科目 弱点判別アプリ</div><span class="version">v1.29</span></div>
+  <div class="top"><div class="brand">PT/OT国試 基礎3科目 弱点判別アプリ</div><span class="version">v1.30.1</span></div>
   <div id="screen"></div>
 </div>
 <div class="nav" id="nav"><div class="navin">
@@ -1015,12 +1194,13 @@ function subjectSummaryHtml(){
   return `<div class="subject-grid">${[...new Set(Q.map(q=>q.subject))].map(s=>{
     const x=subjectStats(s);
     const th=subjectTheme(s);
-    return `<div class="subject-score subject-${th.key}">
+    return `<button type="button" class="subject-score subject-${th.key}" onclick="scrollToSubjectGraph('${s}')" aria-label="${esc(s)}の学習状況グラフを見る">
       <div class="name">${esc(s)}</div>
       <div class="score-caption">現在習熟度</div>
       <div class="scoreline"><b>${x.value}<small> / 100</small></b><div class="meter"><span style="width:${x.value}%"></span></div></div>
       <div class="metric-note">${statusBadge(areaStatus(x,Q.filter(q=>q.subject===s)))}</div>
-    </div>`;
+      <div class="subject-jump-hint">グラフを見る ↓</div>
+    </button>`;
   }).join('')}</div>`;
 }
 function radarSvg(subject){
@@ -1668,6 +1848,17 @@ function renderQuestionSearch(term=''){
 }
 function startExactQuestion(id){if(!qBy(id))return;start([id],'practice');}
 
+function scrollToSubjectGraph(subject){
+  const th=subjectTheme(subject);
+  const el=document.getElementById(`subject-graph-${th.key}`);
+  if(!el)return;
+  el.scrollIntoView({behavior:'smooth',block:'start'});
+  el.classList.remove('jump-focus');
+  void el.offsetWidth;
+  el.classList.add('jump-focus');
+  setTimeout(()=>el.classList.remove('jump-focus'),1250);
+}
+
 function weak(){
   if(!st.diagnosed){home();return;}
   const subjects=Object.keys(ANALYTICS);
@@ -1693,7 +1884,7 @@ function weak(){
 
   ${subjects.map(s=>{
     const th=subjectTheme(s);
-    return `<div class="card subject-analysis-card" style="--subject-color:${th.color};--subject-soft:${th.soft}">
+    return `<div id="subject-graph-${th.key}" class="card subject-analysis-card" style="--subject-color:${th.color};--subject-soft:${th.soft}">
       <div class="weak-subject-head">
         <span class="weak-subject-badge">${esc(s)}</span>
         <h2>${esc(s)}の学習状況</h2>
