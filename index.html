@@ -659,7 +659,7 @@ function conceptScores(){
   }).filter(Boolean).sort((a,b)=>b.av-a.av||b.seen-a.seen);
 }
 function related(key){return Q.filter(q=>q.conceptGroupId===key).map(q=>q.id);}
-function lvl(x){return x.mis?'重点復習':x.seen<3?'参考':x.seen<5?'暫定':x.mastery<60?'弱点':x.mastery<75?'要確認':'安定';}
+function lvl(x){return x.mis?'重点対策':x.seen<3?'参考':x.seen<5?'暫定':x.mastery<60?'要対策':x.mastery<75?'要確認':'安定';}
 function lvlc(x){return x.mis?'high':x.seen<3?'':x.seen<5?'mid':x.mastery<60?'high':x.mastery<75?'mid':'';}
 function weaknessDomainScores(){
   const ids=[...new Set(Q.map(q=>q.weaknessDomainId))];
@@ -678,9 +678,9 @@ function weaknessDomainScores(){
     let status='データ不足';
     if(seen>=5&&seen<required)status='要観察';
     if(eligible){
-      if(mastery<50)status='重点復習';
-      else if(mastery<60)status='弱点';
-      else if(mastery<70)status='到達・要定着';
+      if(mastery<50)status='重点対策';
+      else if(mastery<60)status='要対策';
+      else if(mastery<70)status='基準到達・要定着';
       else if(mastery<80)status='安定';
       else status='定着';
     }
@@ -693,9 +693,9 @@ function weaknessDomainScores(){
 function relatedDomain(key){return Q.filter(q=>q.weaknessDomainId===key).map(q=>q.id);}
 function domainLvl(x){return x.status;}
 function domainLvlc(x){
-  return x.status==='重点復習'?'priority':
-    x.status==='弱点'?'high':
-    x.status==='到達・要定着'?'reached':
+  return x.status==='重点対策'?'priority':
+    x.status==='要対策'?'high':
+    x.status==='基準到達・要定着'?'reached':
     x.status==='安定'?'stable':
     x.status==='定着'?'mastered':
     x.status==='要観察'?'mid':'';
@@ -704,8 +704,8 @@ function domainCard(x){
   const score=x.mastery===null?'—':`${x.mastery}%`;
   const progress=x.eligible
     ?(x.seen>=x.highRequired?`十分な回答データがあります（${x.seen}/${x.total}問）`:`判定可能です。さらに回答すると信頼度が高まります（${x.seen}/${x.total}問）`)
-    :(x.seen<5?`まだデータ不足です（${x.seen}/${x.required}問）`:`あと${x.needed}問で弱点判定が可能です（${x.seen}/${x.required}問）`);
-  return `<div class="weakcard"><div class="weakhead"><div><b>${esc(x.label)}</b><div class="small muted">${esc(x.subject)} · ${x.confidence}</div></div><span class="pill ${domainLvlc(x)}">${domainLvl(x)}</span></div><div class="small muted" style="margin-top:6px">現在習熟度 ${score}</div><div class="domain-progress">${progress}</div><button class="btn soft" style="margin-top:10px;padding:10px" onclick="startDomain('${x.id}')">この領域を確認する →</button></div>`;
+    :(x.seen<5?`まだデータ不足です（${x.seen}/${x.required}問）`:`あと${x.needed}問で学習状況を判定できます（${x.seen}/${x.required}問）`);
+  return `<div class="weakcard"><div class="weakhead"><div><b>${esc(x.label)}</b><div class="small muted">${esc(x.subject)} · ${x.confidence}</div></div><span class="pill ${domainLvlc(x)}">${domainLvl(x)}</span></div><div class="small muted" style="margin-top:6px">現在習熟度 ${score}</div><div class="domain-progress">${progress}</div><button class="btn soft" style="margin-top:10px;padding:10px" onclick="startDomain('${x.id}')">この分野を確認する →</button></div>`;
 }
 function startDomain(key){
   const pool=Q.filter(q=>q.weaknessDomainId===key&&!q.excludeFromDiagnosis);
@@ -729,13 +729,13 @@ function diagnosisMenu(initial=false){
   const title=initial?'初回弱点チェック':'確認テスト';
   const intro=initial
     ?'最初は弱点を確定するのではなく、現在の状態を広く確認します。3科目まとめて行うか、1科目だけ行うかを選べます。'
-    :'学習後の状態を確認します。未回答の問題を優先して出題し、結果は弱点分析に追加されます。';
+    :'学習後の状態を確認します。学習後の状態を確認します。できるだけまだ解いていない問題を出題し、結果は弱点分析に反映されます。';
   S.innerHTML=`<div class="card"><button class="backlink" onclick="home()">← ホームへ戻る</button><h1>${title}</h1><p class="muted">${intro}</p>
     <div class="diag-menu-grid">
-      <div class="diag-menu-card primary"><b>3科目総合</b><div class="diag-count">50問</div><div class="diag-breakdown">解剖学20問・生理学20問・運動学10問<br>25のWeakness Domainから各2問ずつ</div><button class="btn" onclick="startDiagnosis('all')">${initial?'このチェックを始める':'確認テストを始める'}</button></div>
-      <div class="diag-menu-card"><b>解剖学</b><div class="diag-count">20問</div><div class="diag-breakdown">10領域から各2問ずつ</div><button class="btn secondary" onclick="startDiagnosis('anatomy')">解剖学を確認</button></div>
-      <div class="diag-menu-card"><b>生理学</b><div class="diag-count">20問</div><div class="diag-breakdown">10領域から各2問ずつ</div><button class="btn secondary" onclick="startDiagnosis('physiology')">生理学を確認</button></div>
-      <div class="diag-menu-card"><b>運動学</b><div class="diag-count">20問</div><div class="diag-breakdown">5領域から各4問ずつ</div><button class="btn secondary" onclick="startDiagnosis('kinesiology')">運動学を確認</button></div>
+      <div class="diag-menu-card primary"><b>3科目総合</b><div class="diag-count">50問</div><div class="diag-breakdown">解剖学20問・生理学20問・運動学10問<br>25の分野から各2問ずつ</div><button class="btn" onclick="startDiagnosis('all')">${initial?'このチェックを始める':'確認テストを始める'}</button></div>
+      <div class="diag-menu-card"><b>解剖学</b><div class="diag-count">20問</div><div class="diag-breakdown">10分野から各2問ずつ</div><button class="btn secondary" onclick="startDiagnosis('anatomy')">解剖学を確認</button></div>
+      <div class="diag-menu-card"><b>生理学</b><div class="diag-count">20問</div><div class="diag-breakdown">10分野から各2問ずつ</div><button class="btn secondary" onclick="startDiagnosis('physiology')">生理学を確認</button></div>
+      <div class="diag-menu-card"><b>運動学</b><div class="diag-count">20問</div><div class="diag-breakdown">5分野から各4問ずつ</div><button class="btn secondary" onclick="startDiagnosis('kinesiology')">運動学を確認</button></div>
     </div>
     <div class="helpbox" style="margin-top:12px">初回チェックだけで弱点を断定しません。通常演習や確認テストで異なる問題の回答が増えるほど、弱点判定の信頼度が高まります。</div>
   </div>`;
@@ -816,7 +816,7 @@ function resultWeakHtml(limit=3){
         <span class="result-weak-score">現在習熟度 ${x.mastery}%</span>
       </div>
       <div class="result-weak-path">${esc(x.subject)} · ${x.seen}/${x.total}問回答 · ${x.confidence}</div>
-      <div class="result-weak-action">この領域を確認する →</div>
+      <div class="result-weak-action">この分野を確認する →</div>
     </button>`).join('')}</div>`;
 }
 function previousDiagnosisFor(sessionId){
@@ -848,9 +848,9 @@ function areaStatus(stat,questions=[]){
   if(!questions.length||!stat.total)return {text:'準備中',cls:'data'};
   if(!stat.seen)return {text:'未測定',cls:'data'};
   if(stat.insufficient)return {text:'データ少',cls:'data'};
-  if(stat.value<50)return {text:'重点復習',cls:'priority'};
-  if(stat.value<60)return {text:'弱点',cls:'weak'};
-  if(stat.value<70)return {text:'到達・要定着',cls:'check'};
+  if(stat.value<50)return {text:'重点対策',cls:'priority'};
+  if(stat.value<60)return {text:'要対策',cls:'weak'};
+  if(stat.value<70)return {text:'基準到達・要定着',cls:'check'};
   if(stat.value<80)return {text:'安定',cls:'stable'};
   return {text:'定着',cls:'stable'};
 }
@@ -938,7 +938,7 @@ function radarSvg(subject){
   </svg></div>
   <div class="radar-legend"><span><i class="dot current"></i>現在の現在習熟度</span>${prevCut?'<span><i class="dot prev"></i>前回チェック時点</span>':''}</div>
   ${measured<n?`<div style="text-align:center"><span class="radar-gap-note">未測定の軸は0点にせず、図形をつなげていません</span></div>`:''}
-  <div class="radar-note">数値は単純な正答率ではなく、初見結果を重視しつつ、時間を空けた再回答も反映した現在習熟度です。各分類をタップすると、細分類と学習状態を確認できます。</div>
+  <div class="radar-note">数値は単純な正答率ではなく、これまでの回答からみた現在の学習状況です。各項目をタップすると、より詳しい内容を確認できます。</div>
   <div class="axis-grid">${chips}</div>`;
 }
 function weakCard(x){
@@ -946,8 +946,8 @@ function weakCard(x){
 }
 function weakTopHtml(limit=3){
   const w=weaknessDomainScores().filter(x=>x.actionable).slice(0,limit);
-  if(!w.length)return '<p class="muted">現在、60%未満と判定できる弱点領域はありません。回答数が不足している領域は、確認テストや通常演習でデータを増やしてください。</p>';
-  return `<div class="weak-top">${w.map((x,i)=>`<button class="weak-action" onclick="startDomain('${x.id}')"><div class="weak-action-main"><span class="rankbox">${i+1}</span><div class="weak-copy"><b>${esc(x.label)}</b>${x.mis?' <span class="badge-warn">誤概念候補あり</span>':''}<div class="weak-path">${esc(x.subject)} · ${x.seen}/${x.total}問回答 · ${x.confidence}</div></div></div><div class="weak-action-footer"><span>この領域を確認する →</span></div></button>`).join('')}</div>`;
+  if(!w.length)return '<p class="muted">現在、基準到達ラインの60%に届いていないと判定できる分野はありません。回答数が少ない分野は、確認テストや通常演習を続けてみましょう。</p>';
+  return `<div class="weak-top">${w.map((x,i)=>`<button class="weak-action" onclick="startDomain('${x.id}')"><div class="weak-action-main"><span class="rankbox">${i+1}</span><div class="weak-copy"><b>${esc(x.label)}</b><div class="weak-path">${esc(x.subject)} · ${x.seen}/${x.total}問回答 · ${x.confidence}</div></div></div><div class="weak-action-footer"><span>この分野を確認する →</span></div></button>`).join('')}</div>`;
 }
 function diagnosisStatusHtml(){
   const d=diagnosisInfo();
@@ -994,9 +994,9 @@ function home(){
       ${d.last?`<button class="btn secondary" onclick="diagnosisResults('${d.last.id}')">前回のチェック結果を見る</button>`:''}
     </div>
   </div>
-  <div class="card"><h2>3科目の現在地</h2>${subjectSummaryHtml()}<div class="data-note" style="margin-top:8px">現在習熟度は、初見の回答を重視しつつ、時間を空けた再回答も内部的に反映した学習状態の目安です。同じ問題の即時反復だけで弱点が解消された扱いにはしません。</div></div>
-  <div class="card"><h2>現在の弱点 TOP3</h2><p class="small muted">十分な回答数があり、現在習熟度が60%未満の領域だけを弱点として表示します。</p>${weakTopHtml(3)}</div>
-  <div class="analysis-guide"><b>弱点分析は使うほど信頼度が高まります</b><p>確認テストや通常演習で未回答の問題を継続して解くと、各領域の回答データが増えます。弱点を見つけたら教科書などで学習し、再テストして変化を確認してください。</p><button class="btn soft" onclick="diagnosisMenu(false)">確認テストを続ける</button></div>
+  <div class="card"><h2>3科目の現在地</h2>${subjectSummaryHtml()}<div class="data-note" style="margin-top:8px">現在習熟度は、これまでの回答からみた学習状態の目安です。確認テストや通常演習を続けると、学習後の変化も反映されていきます。</div></div>
+  <div class="card"><h2>現在の弱点 TOP3</h2><p class="small muted">十分な回答データがあり、基準到達ラインの60%に届いていない分野を表示します。</p>${weakTopHtml(3)}</div>
+  <div class="analysis-guide"><b>問題を続けて解くと、弱点分析がより詳しくなります</b><p>確認テストや通常演習を続けると、各分野の回答データが増えます。弱点を見つけたら教科書などで学習し、もう一度問題を解いて確認してみましょう。</p><button class="btn soft" onclick="diagnosisMenu(false)">確認テストを続ける</button></div>
   <div class="card"><div class="row" style="border-bottom:0;padding:0"><div><h2 style="margin:0 0 4px">あとで調べる</h2><div class="small muted">気になった用語を後で教科書などで確認</div></div><button class="btn soft" style="width:auto;padding:9px 12px" onclick="lookupPage()">${pendingLookup().length}件 →</button></div></div>
   <div class="card"><h2>学習状況</h2><div class="stats"><div class="stat"><b>${n}</b><span class="small">累積回答</span></div><div class="stat"><b>${n?Math.round(ok/n*100):0}%</b><span class="small">累積正答</span></div><div class="stat"><b>${due.length}</b><span class="small">今日の復習</span></div></div><div class="helpbox" style="margin-top:10px"><b>初見と復習は内部的に区別</b><br>初めて解いた結果は弱点発見に重く使い、復習後の正答は改善・定着の確認として反映します。表示は複雑にせず、現在の状態にまとめます。</div></div>`;
   NAV.classList.remove('hide');nav('home');scrollTopNow();setTimeout(renderInstallCard,0);
@@ -1461,18 +1461,18 @@ function weak(){
   if(!st.diagnosed){home();return;}const subjects=Object.keys(ANALYTICS);scrollTopNow();
   const domains=weaknessDomainScores();
   S.innerHTML=`<div class="card"><h1>弱点分析</h1>
-    <p class="muted">他者との比較は行わず、あなた自身の回答履歴から、国家試験に必要な知識の穴を探します。主判定は25のWeakness Domain、詳細確認は64のconceptGroupを使います。</p>
-    <div class="note"><b>学習上の基準到達ライン：60%</b><br>50%未満＝重点復習 ／ 50〜59%＝弱点 ／ 60〜69%＝到達・要定着 ／ 70〜79%＝安定 ／ 80%以上＝定着。これは国家試験の合格を直接予測する値ではありません。</div>
+    <p class="muted">これまでに解いた問題から、今の理解状況と、次に優先して勉強したい分野を確認できます。</p>
+    <div class="note"><b>学習上の基準到達ライン：60%</b><br>まずは60%に届いていない分野を優先して確認し、60%を超えた分野も安定するまで定着させていきましょう。</div>
     <div class="threshold-grid">
-      <div class="threshold-item"><b>〜49%</b>重点復習</div><div class="threshold-item"><b>50〜59%</b>弱点</div><div class="threshold-item"><b>60〜69%</b>到達・要定着</div><div class="threshold-item"><b>70〜79%</b>安定</div><div class="threshold-item"><b>80%〜</b>定着</div>
+      <div class="threshold-item"><b>〜49%</b>重点対策</div><div class="threshold-item"><b>50〜59%</b>要対策</div><div class="threshold-item"><b>60〜69%</b>基準到達・要定着</div><div class="threshold-item"><b>70〜79%</b>安定</div><div class="threshold-item"><b>80%〜</b>定着</div>
     </div>
     ${subjectSummaryHtml()}
-    <div class="analysis-guide"><b>確認テストを続けると、弱点分析の信頼度が高まります</b><p>回答数が少ない領域は無理に弱点判定しません。未回答の問題を継続して解くほど判定できる領域が増えます。弱点が見つかったら教科書・講義資料・国家試験対策本などで学習し、再テストしてください。</p><button class="btn soft" onclick="diagnosisMenu(false)">確認テストを続ける</button></div>
+    <div class="analysis-guide"><b>問題を続けて解くと、弱点分析がより詳しくなります</b><p>初回チェックだけで分析は完成しません。教科書や講義資料、国家試験対策本などで学習したあとに確認テストや通常演習を続けると、各分野の回答データが増え、現在の理解状況をより確かめやすくなります。</p><button class="btn soft" onclick="diagnosisMenu(false)">確認テストを続ける</button></div>
   </div>
-  <div class="card"><h2>現在の弱点 TOP3</h2><p class="small muted">十分な回答数があり、現在習熟度が60%未満の領域のみ表示します。順位だけを理由に弱点とは判定しません。</p>${weakTopHtml(3)}</div>
-  ${subjects.map(s=>{const th=subjectTheme(s);return `<div class="card weak-subject-card" style="--subject-color:${th.color};--subject-soft:${th.soft}"><div class="weak-subject-head"><span class="weak-subject-badge">${esc(s)}</span><h2>${esc(s)}の弱点マップ</h2></div>${weaknessRadarSvg(s)}</div>`}).join('')}
-  <div class="card"><h2>弱点判定領域（25分類）</h2><p class="small muted">各領域は異なる問題を原則「8問以上かつ領域問題の40%以上」回答してから正式判定します。回答が増えるほど信頼度が高まります。</p>${domains.map(domainCard).join('')}</div>
-  <div class="card"><h2>conceptGroup別の詳細傾向</h2><p class="small muted">64分類は「弱点の中のどこが怪しいか」を見るための内訳です。少数問の結果だけで弱点とは断定しません。</p>${conceptScores().slice(0,12).map(x=>`<div class="weakcard"><div class="weakhead"><div><b>${esc(x.label)}</b><div class="small muted">${esc(x.subject)} · ${x.seen}/${x.total}問回答</div></div><span class="pill">${x.seen<3?'参考':x.seen<5?'傾向':'内訳'}</span></div><div class="small muted" style="margin-top:6px">現在習熟度 ${x.mastery}%</div><button class="btn soft" style="margin-top:10px;padding:10px" onclick="startTag('${x.id}')">この小分類を演習する →</button></div>`).join('')||'<p class="muted">まだありません。</p>'}</div>`;
+  <div class="card"><h2>優先して確認したい分野</h2><p class="small muted">十分な回答データがあり、基準到達ラインの60%に届いていない分野を表示します。</p>${weakTopHtml(3)}</div>
+  ${subjects.map(s=>{const th=subjectTheme(s);return `<div class="card weak-subject-card" style="--subject-color:${th.color};--subject-soft:${th.soft}"><div class="weak-subject-head"><span class="weak-subject-badge">${esc(s)}</span><h2>${esc(s)}の学習状況</h2></div>${weaknessRadarSvg(s)}</div>`}).join('')}
+  <div class="card"><h2>分野別の学習状況</h2><p class="small muted">回答数が少ない分野は、すぐに判断せず「データ不足」や「要観察」と表示します。「あと○問」と表示された分野は、確認テストや通常演習を続けてみましょう。</p>${domains.map(domainCard).join('')}</div>
+  <div class="card"><h2>さらに詳しく見る</h2><p class="small muted">大きな分野の中で、どの内容をもう少し確認するとよいかを見るための詳細表示です。問題数が少ない項目は参考として確認してください。</p>${conceptScores().slice(0,12).map(x=>`<div class="weakcard"><div class="weakhead"><div><b>${esc(x.label)}</b><div class="small muted">${esc(x.subject)} · ${x.seen}/${x.total}問回答</div></div><span class="pill">${x.seen<3?'参考':x.seen<5?'傾向':'確認'}</span></div><div class="small muted" style="margin-top:6px">現在習熟度 ${x.mastery}%</div><button class="btn soft" style="margin-top:10px;padding:10px" onclick="startTag('${x.id}')">この内容を演習する →</button></div>`).join('')||'<p class="muted">まだありません。</p>'}</div>`;
   nav('weak');scrollTopNow();
 }
 
@@ -1533,25 +1533,25 @@ async function importStudyData(input){
 
 function usagePage(){
   S.innerHTML=`<div class="card"><h1>このアプリの使い方</h1>
-    <div class="usage-key"><b>このアプリは「勉強を完結する教材」ではなく、現状把握と弱点分析のためのツールです。</b><br>弱点を見つけたら、教科書・講義資料・国家試験対策本などを使って学習し、再テストして変化を確認してください。アプリ内の解説は補助的な位置づけです。</div>
+    <div class="usage-key"><b>このアプリは、解剖学・生理学・運動学の「今の状態」と「これから勉強したい分野」を確認するためのアプリです。</b><br>アプリだけで勉強を完結させるのではなく、弱点を見つけて、教科書・講義資料・国家試験対策本などを使った学習につなげてください。</div>
     <div class="how-flow">
-      <div class="how-step"><div class="how-num">1</div><div><b>弱点チェック</b><p>最初に現在地を確認します。3科目総合は50問（解剖20・生理20・運動10）、科目別は各20問です。初回は弱点候補を探すスクリーニングです。</p></div></div>
-      <div class="how-step"><div class="how-num">2</div><div><b>弱点分析</b><p>本人の回答履歴だけを使って分析します。他ユーザーとの比較やランキングは行いません。60%未満の領域を重点的に確認します。</p></div></div>
-      <div class="how-step"><div class="how-num">3</div><div><b>教科書などで学習</b><p>弱点項目を整理し、教科書、授業資料、国家試験対策本などで体系的に学習します。このアプリの解説だけで学習を完結させる必要はありません。</p></div></div>
-      <div class="how-step"><div class="how-num">4</div><div><b>確認テスト・通常演習</b><p>学習後に再テストします。未回答の問題や時間を空けた再回答は、現在の習熟状態を更新する重要な情報になります。</p></div></div>
-      <div class="how-step"><div class="how-num">5</div><div><b>再分析して繰り返す</b><p>弱点チェック → 学習 → 確認テスト → 弱点分析を繰り返し、国家試験に必要な知識の穴を一つずつ埋めていきます。</p></div></div>
+      <div class="how-step"><div class="how-num">1</div><div><b>まずは弱点チェック</b><p>最初に現在の理解状況を確認します。3科目をまとめて確認する場合は50問、1科目だけ確認したい場合は各20問です。最初のチェックでは、まず「どのあたりを確認した方がよさそうか」を探します。</p></div></div>
+      <div class="how-step"><div class="how-num">2</div><div><b>弱点分析を確認</b><p>問題を解くと、回答結果が弱点分析に反映されます。苦手な可能性がある分野や、もう少し確認した方がよい分野を見て、次に勉強する内容を決めましょう。</p></div></div>
+      <div class="how-step"><div class="how-num">3</div><div><b>弱点が分かったら勉強</b><p>弱点が見つかったら、その分野を教科書、講義資料、国家試験対策本などで確認しましょう。このアプリの問題解説は、答えや関連知識を確認するための補助として使ってください。</p></div></div>
+      <div class="how-step"><div class="how-num">4</div><div><b>学習したらもう一度確認</b><p>勉強したあとは、確認テストや通常演習を行ってみましょう。その結果も弱点分析に反映されます。回答する問題が増えるほど、その分野の理解状況をより詳しく確認できるようになります。</p></div></div>
+      <div class="how-step"><div class="how-num">5</div><div><b>繰り返して弱点を減らす</b><p><b>弱点を確認 → 勉強 → もう一度問題を解く → 弱点を再確認</b>という流れを繰り返しながら、苦手な分野を少しずつ減らしていきましょう。</p></div></div>
     </div>
   </div>
-  <div class="card"><h2>弱点判定の考え方</h2>
-    <p class="muted">25の大分類で主な弱点を判定し、64のconceptGroupでその内訳を確認します。回答が少ない領域は無理に弱点とは判定しません。</p>
-    <div class="threshold-grid"><div class="threshold-item"><b>〜49%</b>重点復習</div><div class="threshold-item"><b>50〜59%</b>弱点</div><div class="threshold-item"><b>60〜69%</b>到達・要定着</div><div class="threshold-item"><b>70〜79%</b>安定</div><div class="threshold-item"><b>80%〜</b>定着</div></div>
-    <div class="helpbox" style="margin-top:12px">60%は基礎3科目の学習上の基準到達ラインとして設定しています。国家試験の総得点基準を参考にしていますが、このアプリの領域別60%が国家試験の合格を保証・予測するものではありません。</div>
+  <div class="card"><h2>学習状況の目安</h2>
+    <p class="muted">60%を、このアプリでの学習上の基準到達ラインとしています。</p>
+    <div class="threshold-grid"><div class="threshold-item"><b>〜49%</b>重点対策</div><div class="threshold-item"><b>50〜59%</b>要対策</div><div class="threshold-item"><b>60〜69%</b>基準到達・要定着</div><div class="threshold-item"><b>70〜79%</b>安定</div><div class="threshold-item"><b>80%〜</b>定着</div></div>
+    <div class="helpbox" style="margin-top:12px">回答した問題がまだ少ない分野は、すぐに判断せず「データ不足」や「要観察」と表示されます。確認テストや通常演習を続けると、分析できる分野が増えていきます。</div>
   </div>
-  <div class="card"><h2>初見問題と復習問題</h2><p class="muted">内部では同じ重みで扱っていません。</p>
-    <p>初めて解く問題の結果を弱点発見に重く使い、復習後の正答は「学習で改善したか」「時間がたっても定着しているか」を確認する情報として使います。</p>
-    <p class="small muted">同じ問題をその場で繰り返し正解しても、異なる問題を複数解いた場合と同じ診断データにはなりません。学生向け画面では2つの指標を別々に並べず、「現在習熟度」としてまとめて表示します。</p>
-  </div>
-  <div class="card"><h2>分析の信頼度を上げるには</h2><p>確認テストと通常演習のどちらも弱点分析に反映されます。特に、まだ解いていない問題を継続して解くことが重要です。</p><button class="btn" onclick="diagnosisMenu(!st.diagnosed)">${st.diagnosed?'確認テストを行う':'弱点チェックを始める'}</button></div>`;
+  <div class="card"><h2>おすすめの使い方</h2>
+    <p><b>1．弱点チェック → 2．弱点分析 → 3．教科書や国試対策本で学習 → 4．確認テスト・通常演習 → 5．もう一度弱点分析</b></p>
+    <p class="muted">一度のチェックで終わらず、このサイクルを繰り返して使うのがおすすめです。</p>
+    <button class="btn" onclick="diagnosisMenu(!st.diagnosed)">${st.diagnosed?'確認テストを行う':'弱点チェックを始める'}</button>
+  </div>`;
   NAV.classList.remove('hide');nav('usage');scrollTopNow();
 }
 
