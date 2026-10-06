@@ -9,7 +9,7 @@
 <meta name="apple-mobile-web-app-title" content="PT/OT国試"/>
 <link rel="manifest" href="./manifest.webmanifest"/>
 <link rel="apple-touch-icon" href="./app-icon-192.png"/>
-<title>PT/OT国試 基礎3科目 弱点判別アプリ v1.32</title>
+<title>PT/OT国試 基礎3科目 弱点判別アプリ v1.32.1</title>
 <style>
 :root{--bg:#f4f6f8;--card:#fff;--text:#15202b;--muted:#64748b;--line:#e2e8f0;--teal:#0f766e;--teal2:#115e59;--good:#15803d;--bad:#b91c1c;--warn:#b45309}
 *{box-sizing:border-box}
@@ -712,11 +712,18 @@ body{
 .domain-evidence{overflow-x:auto;margin-top:12px}.domain-evidence table{width:100%;border-collapse:collapse;font-size:12px}.domain-evidence th,.domain-evidence td{padding:9px 6px;border-bottom:1px solid #e2e8f0;text-align:left}.domain-evidence thead th{white-space:nowrap;background:#f8fafc}.domain-evidence tbody tr{cursor:pointer}.domain-evidence tbody tr:hover{background:#f0fdfa}
 
 .correct-option-ex{background:#eef8f6;border-left:4px solid #0f766e;padding:12px}.ex-key{color:#174a8b;font-weight:750}.ex-intro{font-weight:700;color:#334155}
+
+/* Keep numeric values and their notes intact at phone widths. */
+.domain-evidence .evidence-value{display:block;white-space:nowrap}
+.domain-evidence .evidence-note{display:block;white-space:nowrap;font-size:11px;line-height:1.5;color:#64748b;margin-top:2px}
+.domain-evidence td{vertical-align:top}
+.domain-evidence thead th:nth-child(3){white-space:normal}
+@media(max-width:360px){.domain-evidence table{font-size:11px}.domain-evidence th,.domain-evidence td{padding:9px 3px}.domain-evidence .evidence-note{font-size:10px}}
 </style>
 </head>
 <body>
 <div class="app">
-  <div class="top"><div class="brand">PT/OT国試 基礎3科目 弱点判別アプリ</div><span class="version">v1.32</span></div>
+  <div class="top"><div class="brand">PT/OT国試 基礎3科目 弱点判別アプリ</div><span class="version">v1.32.1</span></div>
   <div id="screen"></div>
 </div>
 <div class="nav" id="nav"><div class="navin">
@@ -1782,7 +1789,7 @@ function screeningResultHtml(records,limit=5){
 }
 function domainEvidenceTable(subject){
  const rows=weaknessDomainScores().filter(x=>x.subject===subject);
- return `<div class="domain-evidence"><p class="small muted">回答数は異なる問題の数です。未判定の点数は参考値です。</p><table><thead><tr><th>分野</th><th>習熟度</th><th>回答済み／対象</th><th>判定まで</th></tr></thead><tbody>${rows.map(x=>`<tr onclick="openWeaknessDomain('${x.id}')" tabindex="0" onkeydown="if(event.key==='Enter')openWeaknessDomain('${x.id}')"><th>${esc(x.label)}</th><td>${x.mastery===null?'未測定':`${x.mastery}%${x.eligible?'':'（参考）'}`}</td><td>${x.seen}／${x.total}問</td><td>${x.eligible?x.status:`あと${x.needed}問（必要${x.required}問）`}</td></tr>`).join('')}</tbody></table></div>`;
+ return `<div class="domain-evidence"><p class="small muted">回答数は異なる問題の数です。未判定の点数は参考値です。</p><table><thead><tr><th>分野</th><th>習熟度</th><th>回答済み<wbr>／対象</th><th>判定まで</th></tr></thead><tbody>${rows.map(x=>`<tr onclick="openWeaknessDomain('${x.id}')" tabindex="0" onkeydown="if(event.key==='Enter')openWeaknessDomain('${x.id}')"><th>${esc(x.label)}</th><td>${x.mastery===null?'未測定':`<span class="evidence-value">${x.mastery}%</span>${x.eligible?'':'<span class="evidence-note">（参考）</span>'}`}</td><td><span class="evidence-value">${x.seen}／${x.total}問</span></td><td>${x.eligible?x.status:`<span class="evidence-value">あと${x.needed}問</span><span class="evidence-note">（必要${x.required}問）</span>`}</td></tr>`).join('')}</tbody></table></div>`;
 }
 const DOMAIN_SHORT_LABELS={"WA01": "組織・発生", "WA11": "骨・関節", "WA02": "上肢・体幹", "WA03": "下肢", "WA04": "末梢・脳神経", "WA05": "中枢・伝導路", "WA06": "心臓・血管", "WA07": "内臓の構造", "WA09": "視覚・平衡聴覚", "WA10": "体表・局所", "WP01": "細胞・興奮", "WP02": "神経・感覚", "WP11": "感覚・伝導", "WP03": "自律神経", "WP04": "筋・運動生理", "WP05": "呼吸", "WP06": "循環", "WP07": "血液・免疫", "WP08": "腎・排尿", "WP12": "内分泌・生殖", "WP13": "代謝・体温", "WP09": "消化・排便", "WP14": "排便", "WK01": "上肢", "WK02": "下肢", "WK03": "頭頸・体幹・呼吸", "WK04": "姿勢・歩行", "WK05": "力学・運動学習"};
 function weaknessRadarSvg(subject,showChips=false){
