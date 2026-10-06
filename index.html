@@ -9,7 +9,7 @@
 <meta name="apple-mobile-web-app-title" content="PT/OT国試"/>
 <link rel="manifest" href="./manifest.webmanifest"/>
 <link rel="apple-touch-icon" href="./app-icon-192.png"/>
-<title>PT/OT国試 基礎3科目 弱点判別アプリ v1.30.2</title>
+<title>PT/OT国試 基礎3科目 弱点判別アプリ v1.30.3</title>
 <style>
 :root{--bg:#f4f6f8;--card:#fff;--text:#15202b;--muted:#64748b;--line:#e2e8f0;--teal:#0f766e;--teal2:#115e59;--good:#15803d;--bad:#b91c1c;--warn:#b45309}
 *{box-sizing:border-box}
@@ -712,7 +712,7 @@ body{
 </head>
 <body>
 <div class="app">
-  <div class="top"><div class="brand">PT/OT国試 基礎3科目 弱点判別アプリ</div><span class="version">v1.30.2</span></div>
+  <div class="top"><div class="brand">PT/OT国試 基礎3科目 弱点判別アプリ</div><span class="version">v1.30.3</span></div>
   <div id="screen"></div>
 </div>
 <div class="nav" id="nav"><div class="navin">
@@ -1356,7 +1356,12 @@ function diagnosisStatusHtml(){
   return `<div class="diagstatus"><div><b>確認テスト</b><div class="small muted">前回：${d.last.end.toLocaleDateString('ja-JP')} ／ 再確認の目安：${next.toLocaleDateString('ja-JP')}</div></div>${d.recommended?'<span class="badge-warn">再確認おすすめ</span>':''}</div>`;
 }
 function home(){
-  const due=dueIds(),d=diagnosisInfo(),active=!!st.activeDiag;
+  const d=diagnosisInfo(),active=!!st.activeDiag;
+  const runs=diagnosisRuns();
+  const plan=todayReviewPlan();
+  const resultLabel=runs.length<=1?'初回チェックの結果を見る':'前回の確認テスト結果を見る';
+  const reviewLabel=plan.target===0?'今日の復習はありません':(plan.complete?'今日の復習 完了':`今日の復習（${plan.remaining}問）`);
+
   if(!st.diagnosed){
     S.innerHTML=`<div class="card hero">
       <div id="installCard" class="install-card hidden">
@@ -1385,9 +1390,9 @@ function home(){
     <div class="actions">
       ${active?'':`<button class="btn" onclick="diagnosisMenu(false)">確認テスト</button>`}
       <button class="btn secondary" onclick="practice()">分野を選んで演習</button>
-      <button class="btn secondary" ${due.length?'':'disabled'} onclick="startTodayReview()">今日の復習（${due.length}問）</button>
+      <button class="btn secondary" ${(!plan.target||plan.complete)?'disabled':''} onclick="startTodayReview()">${reviewLabel}</button>
       <button class="btn secondary" onclick="questionSearch()">問題を探す</button>
-      ${d.last?`<button class="btn secondary" onclick="diagnosisResults('${d.last.id}')">前回のチェック結果を見る</button>`:''}
+      ${d.last?`<button class="btn secondary" onclick="diagnosisResults('${d.last.id}')">${resultLabel}</button>`:''}
     </div>
   </div>
   <div class="card home-weak-card">
@@ -1460,9 +1465,29 @@ function reviewQueue(){
     retry:due.filter(id=>reviewed.has(id))
   };
 }
-function startTodayReview(){
+function todayReviewPlan(){
   const q=reviewQueue();
-  const ids=[...q.fresh,...q.retry].slice(0,10);
+  const reviewed=reviewedTodayIds();
+  const todayPool=q.fresh.length+reviewed.size;
+  const target=Math.min(10,todayPool);
+  const remaining=Math.max(0,target-reviewed.size);
+  return {
+    target,
+    done:Math.min(reviewed.size,target),
+    remaining,
+    ids:q.fresh.slice(0,remaining),
+    complete:target===0||remaining===0,
+    hasExtra:q.fresh.length>remaining,
+    retry:q.retry.length
+  };
+}
+function startTodayReview(){
+  const plan=todayReviewPlan();
+  if(!plan.ids.length){home();return;}
+  start(plan.ids,'review');
+}
+function startExtraReview(){
+  const ids=reviewQueue().fresh.slice(0,10);
   if(!ids.length){home();return;}
   start(ids,'review');
 }
@@ -1580,7 +1605,9 @@ function reviewResults(sessionId){
   const n=recs.length,ok=recs.filter(a=>a.correct).length;
   const focus=recs.filter(a=>!a.correct&&a.conf==='high').length;
   const unsure=recs.filter(a=>a.conf!=='high').length;
-  const queue=reviewQueue(),fresh=queue.fresh.length,retry=queue.retry.length;
+  const q=reviewQueue();
+  const hasExtra=q.fresh.length>0;
+  const hasRetry=q.retry.length>0;
   const list=recs.map((a,i)=>{
     const q=qBy(a.id);if(!q)return '';
     const cls=(!a.correct&&a.conf==='high')?'focus':(a.correct?'good':'bad');
@@ -1592,13 +1619,13 @@ function reviewResults(sessionId){
   }).join('');
   S.innerHTML=`<div class="card">
     <div class="review-result-head">
-      <div><h1 style="margin-bottom:5px">今回の復習結果</h1><p class="muted">まず復習を終え、必要な問題だけここから深掘りできます。</p></div>
+      <div><h1 style="margin-bottom:5px">今回の復習結果</h1><p class="muted">今日の復習はここまででOKです。必要な問題だけ、ここから確認できます。</p></div>
       <div><div class="review-result-score">${ok} / ${n}</div><div class="review-result-sub">正答率 ${Math.round(ok/n*100)}%</div></div>
     </div>
     <div class="stats" style="margin-top:12px">
       <div class="stat"><b>${focus}</b><span class="small">重点確認</span></div>
       <div class="stat"><b>${unsure}</b><span class="small">迷い・不明</span></div>
-      <div class="stat"><b>${fresh}</b><span class="small">未実施の復習</span></div>
+      <div class="stat"><b>${n}</b><span class="small">今回の復習</span></div>
     </div>
   </div>
   <div class="card">
@@ -1609,12 +1636,12 @@ function reviewResults(sessionId){
   <div class="card">
     <h2>次にどうする？</h2>
     <div class="result-actions">
-      <button class="btn" ${fresh?'':'disabled'} onclick="startFreshReview()">未実施の復習を続ける（${fresh}問）</button>
-      <button class="btn secondary" ${retry?'':'disabled'} onclick="startRetryReview()">今日の再確認（${retry}問）</button>
+      ${hasRetry?'<button class="btn secondary" onclick="startRetryReview()">間違えた・迷った問題を再確認</button>':''}
+      ${hasExtra?'<button class="btn secondary" onclick="startExtraReview()">余裕があれば、もう1セット復習</button>':''}
       <button class="btn secondary" onclick="practice()">通常演習へ</button>
-      <button class="btn secondary" onclick="home()">ホームへ</button>
+      <button class="btn" onclick="home()">今日はここまで</button>
     </div>
-    <div class="review-session-note">1回の復習は最大10問です。途中でホームへ戻っても回答済みデータは残ります。</div>
+    <div class="review-session-note">通常の「今日の復習」は1日最大10問です。追加の復習は任意です。</div>
   </div>`;
   NAV.classList.remove('hide');nav('home');scrollTopNow();
 }

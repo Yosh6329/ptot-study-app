@@ -1,7 +1,7 @@
 {
-  "name": "PT/OT国試 弱点診断＆自動復習",
-  "short_name": "PTOT国試",
-  "description": "PT/OT国家試験の基礎3科目を診断し、弱点と復習問題を自動整理する学習アプリ",
+  "name": "PT/OT国試 基礎3科目 弱点判別アプリ",
+  "short_name": "PTOT 3科目",
+  "description": "解剖学・生理学・運動学の現状把握と弱点判別を支援するPT/OT国家試験対策アプリ",
   "id": "./",
   "start_url": "./",
   "scope": "./",
