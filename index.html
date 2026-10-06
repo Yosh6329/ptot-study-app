@@ -9,7 +9,7 @@
 <meta name="apple-mobile-web-app-title" content="PT/OT国試"/>
 <link rel="manifest" href="./manifest.webmanifest"/>
 <link rel="apple-touch-icon" href="./app-icon-192.png"/>
-<title>PT/OT国試 基礎3科目 弱点判別アプリ v1.30.1</title>
+<title>PT/OT国試 基礎3科目 弱点判別アプリ v1.30.2</title>
 <style>
 :root{--bg:#f4f6f8;--card:#fff;--text:#15202b;--muted:#64748b;--line:#e2e8f0;--teal:#0f766e;--teal2:#115e59;--good:#15803d;--bad:#b91c1c;--warn:#b45309}
 *{box-sizing:border-box}
@@ -696,11 +696,23 @@ body{
   100%{box-shadow:0 4px 16px rgba(15,74,68,.045)}
 }
 
+
+/* v1.30.2 image trim + provisional graph */
+.figure .problem-image{
+  object-position:top center;
+}
+.radar-note .subnote{
+  display:block;
+  font-size:11px;
+  color:#64748b;
+  margin-top:4px;
+}
+
 </style>
 </head>
 <body>
 <div class="app">
-  <div class="top"><div class="brand">PT/OT国試 基礎3科目 弱点判別アプリ</div><span class="version">v1.30.1</span></div>
+  <div class="top"><div class="brand">PT/OT国試 基礎3科目 弱点判別アプリ</div><span class="version">v1.30.2</span></div>
   <div id="screen"></div>
 </div>
 <div class="nav" id="nav"><div class="navin">
@@ -726,13 +738,77 @@ function scrollTopNow(){ requestAnimationFrame(()=>window.scrollTo({top:0,left:0
 function problemFigureHtml(q){
   if(q.problemImage){
     const imgId=`problemImg-${q.id}`;
-    return `<div class="figure"><img id="${imgId}" class="problem-image" src="${q.problemImage}" referrerpolicy="no-referrer" loading="lazy" alt="${q.problemImageCaption||'問題図'}" data-official="${q.officialFigureUrl||''}" onclick="openImageModal(this)" onerror="this.style.display='none';const n=this.closest('.figure').querySelector('.image-fallback');if(n)n.style.display='block'"><div class="small muted" style="text-align:center;margin-top:6px">${q.problemImageCaption||''}</div><div class="image-fallback small muted" style="display:none;text-align:center;margin-top:8px;padding:10px;background:#fff7ed;border-radius:9px">画像配信を取得できません。下の「厚生労働省の公式原図を開く」から確認してください。</div><div class="figure-actions"><button class="figure-action" onclick="openImageModal(document.getElementById('${imgId}'))">画像を拡大</button>${q.officialFigureUrl?`<a class="figure-action" href="${q.officialFigureUrl}" target="_blank" rel="noopener">厚生労働省の公式原図を開く</a>`:''}</div></div>`;
+    return `<div class="figure"><img id="${imgId}" class="problem-image" src="${q.problemImage}" referrerpolicy="no-referrer" loading="lazy" alt="${q.problemImageCaption||'問題図'}" data-official="${q.officialFigureUrl||''}" data-original-src="${q.problemImage}" onclick="openImageModal(this)" onload="trimProblemImage(this)" onerror="this.style.display='none';const n=this.closest('.figure').querySelector('.image-fallback');if(n)n.style.display='block'"><div class="small muted" style="text-align:center;margin-top:6px">${q.problemImageCaption||''}</div><div class="image-fallback small muted" style="display:none;text-align:center;margin-top:8px;padding:10px;background:#fff7ed;border-radius:9px">画像配信を取得できません。下の「厚生労働省の公式原図を開く」から確認してください。</div><div class="figure-actions"><button class="figure-action" onclick="openImageModal(document.getElementById('${imgId}'))">画像を拡大</button>${q.officialFigureUrl?`<a class="figure-action" href="${q.officialFigureUrl}" target="_blank" rel="noopener">厚生労働省の公式原図を開く</a>`:''}</div></div>`;
   }
   if(q.officialFigureUrl){
     return `<div class="figure" style="padding:12px"><div class="small muted">この問題の図は現在アプリ内表示の準備中です。</div><div class="figure-actions"><a class="figure-action" href="${q.officialFigureUrl}" target="_blank" rel="noopener">厚生労働省の公式原図を開く</a></div></div>`;
   }
   return '';
 }
+
+function trimProblemImage(img){
+  if(!img || img.dataset.trimmed==='1') return;
+  if(!img.complete || !img.naturalWidth || !img.naturalHeight) return;
+  try{
+    const w=img.naturalWidth,h=img.naturalHeight;
+    const canvas=document.createElement('canvas');
+    canvas.width=w; canvas.height=h;
+    const ctx=canvas.getContext('2d',{willReadFrequently:true});
+    ctx.drawImage(img,0,0);
+    const data=ctx.getImageData(0,0,w,h).data;
+
+    let minX=w, minY=h, maxX=-1, maxY=-1;
+    for(let y=0;y<h;y++){
+      for(let x=0;x<w;x++){
+        const i=(y*w+x)*4;
+        const a=data[i+3];
+        if(a<10) continue;
+        const r=data[i], g=data[i+1], b=data[i+2];
+        // 白〜薄いグレーの背景を無視し、線・文字・図のみを検出する
+        const isContent = !((r>246 && g>246 && b>246) || (r>235 && g>235 && b>235 && Math.abs(r-g)<8 && Math.abs(g-b)<8));
+        if(isContent){
+          if(x<minX) minX=x;
+          if(y<minY) minY=y;
+          if(x>maxX) maxX=x;
+          if(y>maxY) maxY=y;
+        }
+      }
+    }
+
+    if(maxX<0 || maxY<0){
+      img.dataset.trimmed='1';
+      return;
+    }
+
+    // トリミングしすぎないよう少し余白を戻す
+    const padX=Math.max(10,Math.round(w*0.015));
+    const padY=Math.max(10,Math.round(h*0.015));
+    minX=Math.max(0,minX-padX);
+    minY=Math.max(0,minY-padY);
+    maxX=Math.min(w-1,maxX+padX);
+    maxY=Math.min(h-1,maxY+padY);
+
+    const cropW=maxX-minX+1, cropH=maxY-minY+1;
+
+    // ほとんど変わらない場合はそのまま
+    const widthSaved=(w-cropW)/w;
+    const heightSaved=(h-cropH)/h;
+    if(widthSaved<0.04 && heightSaved<0.08){
+      img.dataset.trimmed='1';
+      return;
+    }
+
+    const out=document.createElement('canvas');
+    out.width=cropW; out.height=cropH;
+    const outCtx=out.getContext('2d');
+    outCtx.drawImage(canvas,minX,minY,cropW,cropH,0,0,cropW,cropH);
+    img.src=out.toDataURL('image/png');
+    img.dataset.trimmed='1';
+  }catch(e){
+    img.dataset.trimmed='1';
+  }
+}
+
 function openImageModal(img){
   if(!img)return;
   let modal=document.getElementById('imageModal');
@@ -1622,37 +1698,43 @@ function weaknessRadarSvg(subject,showChips=false){
   const cx=210,cy=170,r=105;
   const pt=(i,val,rr=r)=>{const ang=-Math.PI/2+i*2*Math.PI/n,rad=rr*(val/100);return [cx+rad*Math.cos(ang),cy+rad*Math.sin(ang)];};
   const ring=f=>rows.map((_,i)=>pt(i,100,r*f).join(',')).join(' ');
-  const vals=rows.map(x=>x.eligible?x.mastery:null);
+  const vals=rows.map(x=>x.seen?x.mastery:null);
+
   const sectors=rows.map((x,i)=>{
     const j=(i+1)%n,a=vals[i],b=vals[j];
     if(a===null||b===null)return'';
+    const provisional=!(rows[i].eligible&&rows[j].eligible);
     const p1=pt(i,a),p2=pt(j,b);
-    return `<polygon points="${cx},${cy} ${p1[0]},${p1[1]} ${p2[0]},${p2[1]}" fill="${theme.fill}"/>`;
+    return `<polygon points="${cx},${cy} ${p1[0]},${p1[1]} ${p2[0]},${p2[1]}" fill="${theme.fill}" ${provisional?'opacity=".45"':''}/>`;
   }).join('');
+
   const edges=rows.map((x,i)=>{
     const j=(i+1)%n,a=vals[i],b=vals[j];
     if(a===null||b===null)return'';
+    const provisional=!(rows[i].eligible&&rows[j].eligible);
     const p1=pt(i,a),p2=pt(j,b);
-    return `<line x1="${p1[0]}" y1="${p1[1]}" x2="${p2[0]}" y2="${p2[1]}" stroke="${theme.color}" stroke-width="2.5"/>`;
+    return `<line x1="${p1[0]}" y1="${p1[1]}" x2="${p2[0]}" y2="${p2[1]}" stroke="${theme.color}" stroke-width="2.5" ${provisional?'stroke-dasharray="5 4" opacity=".78"':''}/>`;
   }).join('');
+
   const axes=rows.map((x,i)=>{
     const [x1,y1]=pt(i,100),[lx,ly]=pt(i,100,n>=9?132:140),v=vals[i],p=v===null?null:pt(i,v),anchor=lx<cx-18?'end':lx>cx+18?'start':'middle';
-    const label=x.eligible?`${v}%・${x.status}`:x.status;
+    const label=x.eligible?`${v}%・${x.status}`:(x.seen?`${x.status}`:'データ不足');
     return `<line x1="${cx}" y1="${cy}" x2="${x1}" y2="${y1}" stroke="#d6dee8"/>
-      ${p?`<circle cx="${p[0]}" cy="${p[1]}" r="4.5" fill="#fff" stroke="${theme.color}" stroke-width="2.5"/>`:''}
+      ${p?`<circle cx="${p[0]}" cy="${p[1]}" r="4.5" fill="#fff" stroke="${theme.color}" stroke-width="2.5" ${x.eligible?'':'opacity=".78"'}/>`:''}
       <g class="axis-label" onclick="event.stopPropagation();openWeaknessDomain('${x.id}')">
         <text x="${lx}" y="${ly}" text-anchor="${anchor}" dominant-baseline="middle" font-size="${n>=9?8.4:10}" font-weight="700" fill="#334155">${esc(x.label)}</text>
         <text class="radar-score-label" x="${lx}" y="${ly+13}" text-anchor="${anchor}" dominant-baseline="middle">${label}</text>
       </g>`;
   }).join('');
-  const chips=showChips?rows.map(x=>`<button class="axis-chip" onclick="openWeaknessDomain('${x.id}')"><b>${esc(x.label)}</b><div class="axis-chip-meta"><span>${x.eligible?`${x.mastery}%・${x.status}`:x.status}</span><span class="go">詳細 →</span></div></button>`).join(''):'';
+
+  const chips=showChips?rows.map(x=>`<button class="axis-chip" onclick="openWeaknessDomain('${x.id}')"><b>${esc(x.label)}</b><div class="axis-chip-meta"><span>${x.eligible?`${x.mastery}%・${x.status}`:(x.seen?x.status:'データ不足')}</span><span class="go">詳細 →</span></div></button>`).join(''):'';
   return `<div class="radar-wrap radar-clickable" onclick="openSubjectWeakness('${subject}')">
       <svg class="radar" viewBox="0 0 420 350">
         ${[.25,.5,.6,.75,1].map(f=>`<polygon points="${ring(f)}" fill="none" stroke="${f===.6?'#f59e0b':'#e2e8f0'}" ${f===.6?'stroke-dasharray="4 3"':''}/>`).join('')}
         ${sectors}${edges}${axes}
       </svg>
     </div>
-    <div class="radar-note">グラフをタップすると${esc(subject)}の詳細へ進めます。各項目名をタップすると、その分野を直接確認できます。</div>
+    <div class="radar-note">グラフをタップすると${esc(subject)}の詳細へ進めます。各項目名をタップすると、その分野を直接確認できます。<span class="subnote">点線と薄い色は、回答データがまだ少ない分野を含む仮表示です。</span></div>
     ${showChips?`<div class="axis-grid">${chips}</div>`:''}`;
 }
 function openSubjectWeakness(subject){
