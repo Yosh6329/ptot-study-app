@@ -9,7 +9,7 @@
 <meta name="apple-mobile-web-app-title" content="PT/OT国試"/>
 <link rel="manifest" href="./manifest.webmanifest"/>
 <link rel="apple-touch-icon" href="./app-icon-192.png"/>
-<title>PT/OT国試 基礎3科目 弱点判別アプリ v1.32.1</title>
+<title>PT/OT国試 基礎3科目 弱点判別アプリ v1.33</title>
 <style>
 :root{--bg:#f4f6f8;--card:#fff;--text:#15202b;--muted:#64748b;--line:#e2e8f0;--teal:#0f766e;--teal2:#115e59;--good:#15803d;--bad:#b91c1c;--warn:#b45309}
 *{box-sizing:border-box}
@@ -719,11 +719,13 @@ body{
 .domain-evidence td{vertical-align:top}
 .domain-evidence thead th:nth-child(3){white-space:normal}
 @media(max-width:360px){.domain-evidence table{font-size:11px}.domain-evidence th,.domain-evidence td{padding:9px 3px}.domain-evidence .evidence-note{font-size:10px}}
+
+.session-toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:8px 0 12px}.session-toolbar p{margin:0}.session-pause{background:#fff;color:#176b68;border:1px solid #91bdb9;border-radius:10px;padding:8px 10px;font-size:12px;white-space:nowrap;cursor:pointer}
 </style>
 </head>
 <body>
 <div class="app">
-  <div class="top"><div class="brand">PT/OT国試 基礎3科目 弱点判別アプリ</div><span class="version">v1.32.1</span></div>
+  <div class="top"><div class="brand">PT/OT国試 基礎3科目 弱点判別アプリ</div><span class="version">v1.33</span></div>
   <div id="screen"></div>
 </div>
 <div class="nav" id="nav"><div class="navin">
@@ -741,6 +743,7 @@ if(!Array.isArray(st.attempts)) st.attempts=[];
 if(typeof st.diagnosed!=='boolean') st.diagnosed=false;
 if(!Array.isArray(st.lookup)) st.lookup=[];
 if(!st.activeDiag || !Array.isArray(st.activeDiag.ids)) st.activeDiag=null;
+if(!st.openSessions||typeof st.openSessions!=='object'||Array.isArray(st.openSessions))st.openSessions={};
 let ses = null;
 const S = document.getElementById('screen');
 const NAV = document.getElementById('nav');
@@ -1395,6 +1398,7 @@ function diagnosisStatusHtml(){
   return `<div class="diagstatus"><div><b>確認テスト</b><div class="small muted">前回：${d.last.end.toLocaleDateString('ja-JP')} ／ 再確認の目安：${next.toLocaleDateString('ja-JP')}</div></div>${d.recommended?'<span class="badge-warn">再確認おすすめ</span>':''}</div>`;
 }
 function home(){
+  if(ses)suspendSession();
   const d=diagnosisInfo(),active=!!st.activeDiag;
   const runs=diagnosisRuns();
   const plan=todayReviewPlan();
@@ -1402,7 +1406,7 @@ function home(){
   const reviewLabel=plan.target===0?'今日の復習はありません':(plan.complete?'今日の復習 完了':`今日の復習（${plan.remaining}問）`);
 
   if(!st.diagnosed){
-    S.innerHTML=`<div class="card hero">
+    S.innerHTML=`${practiceResumeHtml()}<div class="card hero">
       <div id="installCard" class="install-card hidden">
         <div class="install-title" data-install-title>スマホにインストールできます</div>
         <div class="install-body" data-install-body></div>
@@ -1417,7 +1421,7 @@ function home(){
     NAV.classList.remove('hide');nav('home');scrollTopNow();setTimeout(renderInstallCard,0);return;
   }
 
-  S.innerHTML=`<div class="card hero">
+  S.innerHTML=`${practiceResumeHtml()}<div class="card hero">
     <div id="installCard" class="install-card hidden">
       <div class="install-title" data-install-title>スマホにインストールできます</div>
       <div class="install-body" data-install-body></div>
@@ -1462,15 +1466,46 @@ function resumeDiagnosis(){
  }
 
   const d=st.activeDiag;if(!d||!Array.isArray(d.ids)||!d.ids.length){st.activeDiag=null;save();diagnosisMenu(!st.diagnosed);return;}
-  ses={ids:[...d.ids],i:Math.min(d.i||0,d.ids.length),type:'diag',diagMode:d.mode||'all',sessionId:d.sessionId,selected:new Set(),conf:null,answered:false,display:null,attempts:Array.isArray(d.responses)?[...d.responses]:[]};
+  ses={ids:[...d.ids],i:Math.min(d.i||0,d.ids.length),type:'diag',diagMode:d.mode||'all',sessionId:d.sessionId,selected:new Set(d.selected||[]),conf:d.conf||null,answered:false,display:null,attempts:Array.isArray(d.responses)?[...d.responses]:[]};
   if(ses.i>=ses.ids.length){finish();return;}
   question();
 }
-function pauseDiagnosis(){
-  if(!ses||ses.type!=='diag'){home();return;}
-  st.activeDiag={ids:[...ses.ids],i:ses.i,sessionId:ses.sessionId,mode:ses.diagMode||'all',started:st.activeDiag?.started||new Date().toISOString(),responses:[...ses.attempts]};
-  save();ses=null;NAV.classList.remove('hide');home();
+function pauseDiagnosis(){pauseSession();}
+
+function checkpointSession(){
+ if(!ses||ses.i>=ses.ids.length)return;
+ if(ses.type==='diag'){
+  st.activeDiag={ids:[...ses.ids],i:ses.i,sessionId:ses.sessionId,mode:ses.diagMode||'all',started:st.activeDiag?.started||new Date().toISOString(),responses:[...ses.attempts],selected:[...ses.selected],conf:ses.conf};
+ }else{
+  st.openSessions[ses.sessionId]={ids:[...ses.ids],i:ses.i,type:ses.type,sessionId:ses.sessionId,selected:[...ses.selected],conf:ses.conf,answered:ses.answered,attempts:[...ses.attempts],updated:new Date().toISOString()};
+ }
+ save();
 }
+function suspendSession(){checkpointSession();ses=null;}
+function pauseSession(){suspendSession();home();}
+function practiceResumeHtml(){
+ const pending=Object.values(st.openSessions).filter(x=>Array.isArray(x.ids)&&x.i<x.ids.length).sort((a,b)=>b.updated.localeCompare(a.updated));
+ if(!pending.length)return '';
+ return `<div class="card"><h2>中断した演習・復習</h2><p class="small muted">選択中の回答や、読んでいた解説から再開できます。</p>${pending.map(p=>{const label=p.type==='review'?'今日の復習':'演習',q=qBy(p.ids[p.i]);return `<div class="resume-card"><b>${label}の続き</b><div class="small muted">${p.attempts.length} / ${p.ids.length}問 回答済み${q?' · '+esc(q.subject):''}</div><div class="resume-actions"><button class="btn" onclick="resumePractice('${esc(p.sessionId)}')">続きから再開</button><button class="btn secondary" onclick="discardPractice('${esc(p.sessionId)}')">この続きは終了</button></div></div>`}).join('')}</div>`;
+}
+function resumePractice(id){
+ if(ses)suspendSession();
+ const p=st.openSessions[id];if(!p)return home();
+ ses={...p,ids:[...p.ids],attempts:[...p.attempts],selected:new Set(p.selected||[]),display:null};
+ while(ses.i<ses.ids.length&&(!qBy(ses.ids[ses.i])||qBy(ses.ids[ses.i]).retiredFromPractice)){ses.i++;ses.selected=new Set();ses.conf=null;ses.answered=false;}
+ if(ses.i>=ses.ids.length){delete st.openSessions[id];save();ses=null;return home();}
+ question();
+}
+function discardPractice(id){
+ if(!confirm('この演習の続きは終了しますか？回答済みの学習履歴は残ります。'))return;
+ delete st.openSessions[id];save();home();
+}
+function restoreQuestionUi(){
+ document.querySelectorAll('.choice').forEach(el=>el.classList.toggle('sel',ses.selected.has(el.dataset.id)));
+ document.querySelectorAll('.conf').forEach(el=>el.classList.toggle('sel',el.dataset.c===ses.conf));
+ if(ses.answered&&ses.type!=='diag')renderAnswerFeedback();else sync();
+}
+
 function restartDiagnosis(){
   const mode=st.activeDiag?.mode||'all';
   if(st.activeDiag&&!confirm('途中までの回答を破棄して、最初からやり直しますか？'))return;
@@ -1478,7 +1513,7 @@ function restartDiagnosis(){
 }
 function practice(){
   if(!st.diagnosed){home();return;}const subjects=Object.keys(ANALYTICS);scrollTopNow();
-  S.innerHTML=`<div class="card"><h1>分野別演習</h1><p class="muted">科目を選び、これまでの回答から弱点状態を見ながら演習できます。</p><div class="practice-select">${subjects.map(s=>{const th=subjectTheme(s),a=subjectAreaStatus(s);return `<button class="selectbtn practice-subject-${th.key}" onclick="practiceSubject('${s.replace(/'/g,"\\'")}')"><div class="practice-btn-head"><div class="practice-btn-title"><b>${esc(s)}</b><div class="practice-btn-meta">${masteryText(a.stat)}</div></div>${statusBadge(a.status)}</div></button>`}).join('')}</div><button class="btn secondary" style="margin-top:12px" onclick="home()">戻る</button></div>`;NAV.classList.add('hide');scrollTopNow();
+  S.innerHTML=`<div class="card"><h1>分野別演習</h1><p class="muted">科目を選び、これまでの回答から弱点状態を見ながら演習できます。</p><div class="practice-select">${subjects.map(s=>{const th=subjectTheme(s),a=subjectAreaStatus(s);return `<button class="selectbtn practice-subject-${th.key}" onclick="practiceSubject('${s.replace(/'/g,"\\'")}')"><div class="practice-btn-head"><div class="practice-btn-title"><b>${esc(s)}</b><div class="practice-btn-meta">${masteryText(a.stat)}</div></div>${statusBadge(a.status)}</div></button>`}).join('')}</div><button class="btn secondary" style="margin-top:12px" onclick="home()">戻る</button></div>`;NAV.classList.remove('hide');scrollTopNow();
 }
 function practiceSubject(subject){
   const axes=ANALYTICS[subject]||[];scrollTopNow();
@@ -1561,12 +1596,8 @@ function startRetryReview(){
   if(!ids.length){home();return;}
   start(ids,'review');
 }
-function pauseReview(){
-  ses=null;
-  NAV.classList.remove('hide');
-  home();
-}
-function start(ids,type){ids=ids.filter(id=>qBy(id)&&!qBy(id).retiredFromPractice);if(!ids.length){practice();return;}
+function pauseReview(){pauseSession();}
+function start(ids,type){if(ses)suspendSession();ids=ids.filter(id=>qBy(id)&&!qBy(id).retiredFromPractice);if(!ids.length){practice();return;}
   if(!ids.length)return;
   ses={ids:[...ids],i:0,type,sessionId:`${Date.now()}-${Math.random().toString(36).slice(2,8)}`,selected:new Set(),conf:null,answered:false,display:null,attempts:[]};
   question();
@@ -1575,7 +1606,7 @@ function question(){
   const q=qBy(ses.ids[ses.i]);ses.display=[...q.options];const need=q.answers.length,isDiag=ses.type==='diag',isReview=ses.type==='review';
   S.innerHTML=`<div class="card">
     <div class="progress"><div style="width:${Math.round(ses.i/ses.ids.length*100)}%"></div></div>
-    <p class="small muted">${ses.i+1} / ${ses.ids.length}</p>
+    <div class="session-toolbar"><p class="small muted">${ses.i+1} / ${ses.ids.length}</p><button class="session-pause" onclick="pauseSession()">中断してホームへ</button></div>
     ${isDiag?`<div class="test-mode-badge">${diagnosisModeLabel(ses.diagMode||'all')}</div>`:isReview?'<div class="review-mode-badge">今日の復習</div>':`<div class="source">${q.source}</div>`}
     ${isDiag?'':`<div class="tags"><span class="tag">${q.subject}</span><span class="tag">${q.weaknessDomain}</span><span class="tag">${q.concept}</span></div>`}
     ${isReview?`<div class="source">${q.source}</div>`:''}
@@ -1591,13 +1622,13 @@ function question(){
     </div>
     ${isDiag?'<div class="diag-note">チェック中は正解・解説を表示しません。全問終了後に、間違えた問題や全問題をまとめて確認できます。</div>':''}
     <button class="btn" id="answerBtn" onclick="answer()" disabled>${isDiag?'回答して次へ':'回答する'}</button>
-    ${isDiag?'<button class="btn secondary" style="margin-top:8px" onclick="pauseDiagnosis()">ここで中断してホームへ</button>':''}
-    ${isReview?'<button class="btn secondary" style="margin-top:8px" onclick="pauseReview()">中断してホームへ</button><div class="review-session-note">回答済みの結果は保存されます。残りはあとで続けられます。</div>':''}
+    <button class="btn secondary" style="margin-top:8px" onclick="pauseSession()">中断してホームへ</button><div class="review-session-note">途中の状態は保存されます。ホームから続きに戻れます。</div>
+    
   </div>`;
-  NAV.classList.add('hide');scrollTopNow();
+  NAV.classList.remove('hide');document.querySelectorAll('.nav button').forEach(b=>b.classList.remove('on'));restoreQuestionUi();checkpointSession();scrollTopNow();
 }
-function toggleChoice(id){if(ses.answered)return;const need=qBy(ses.ids[ses.i]).answers.length;if(ses.selected.has(id))ses.selected.delete(id);else{if(ses.selected.size>=need)return;ses.selected.add(id);}document.querySelectorAll('.choice').forEach(el=>el.classList.toggle('sel',ses.selected.has(el.dataset.id)));sync();}
-function setConf(c){if(ses.answered)return;ses.conf=c;document.querySelectorAll('.conf').forEach(el=>el.classList.toggle('sel',el.dataset.c===c));sync();}
+function toggleChoice(id){if(ses.answered)return;const need=qBy(ses.ids[ses.i]).answers.length;if(ses.selected.has(id))ses.selected.delete(id);else{if(ses.selected.size>=need)return;ses.selected.add(id);}document.querySelectorAll('.choice').forEach(el=>el.classList.toggle('sel',ses.selected.has(el.dataset.id)));sync();checkpointSession();}
+function setConf(c){if(ses.answered)return;ses.conf=c;document.querySelectorAll('.conf').forEach(el=>el.classList.toggle('sel',el.dataset.c===c));sync();checkpointSession();}
 function sync(){const q=qBy(ses.ids[ses.i]);document.getElementById('answerBtn').disabled=!(ses.conf&&ses.selected.size===q.answers.length);}
 function officialAcceptedOptions(q){
  return q.official_answer_patterns?.length?[...new Set(q.official_answer_patterns.flat().map(n=>'o'+n))]:q.answers;
@@ -1608,6 +1639,7 @@ function officialSelectionIsCorrect(q,selected){
  return patterns.some(p=>JSON.stringify([...p].sort())===actual);
 }
 function answer(){
+  if(!ses||ses.answered||!ses.conf||ses.selected.size!==qBy(ses.ids[ses.i]).answers.length)return;
   const q=qBy(ses.ids[ses.i]),selected=[...ses.selected].sort(),expected=[...q.answers].sort(),correct=officialSelectionIsCorrect(q,selected);
   const rec={questionVersion:'1.32',id:q.id,ts:new Date().toISOString(),correct,conf:ses.conf,type:ses.type,sessionId:ses.sessionId,diagMode:ses.diagMode||null,selected:[...ses.selected]};
 
@@ -1623,6 +1655,10 @@ function answer(){
   }
 
   st.attempts.push(rec);ses.attempts.push(rec);save();ses.answered=true;
+  checkpointSession();renderAnswerFeedback();
+}
+function renderAnswerFeedback(){
+  const q=qBy(ses.ids[ses.i]),correct=officialSelectionIsCorrect(q,[...ses.selected]);
   document.querySelectorAll('.choice').forEach(el=>{const id=el.dataset.id;if(officialAcceptedOptions(q).includes(id))el.classList.add('ok');if(ses.selected.has(id)&&!officialAcceptedOptions(q).includes(id))el.classList.add('ng');});
 
   const optionHtml=ses.display.map((o,idx)=>`<div class="option-ex ${officialAcceptedOptions(q).includes(o.id)?'correct-option-ex':''}"><b>${officialAcceptedOptions(q).includes(o.id)?'✓ ':''}${idx+1}. ${o.text}</b><br/>${optionIntro(q,o.id)}${explanationMarkup(q,o.id)}</div>`).join('');
@@ -1641,7 +1677,9 @@ function answer(){
     </div>
     <button class="btn" style="margin-top:12px" onclick="nextQ()">${ses.i+1===ses.ids.length?'結果を見る':'次の問題'}</button>
     ${ses.type==='review'?'':`<button class="btn secondary" style="margin-top:8px" onclick="continueRelated('${q.id}')">関連問題を続ける</button>`}`;
+
 }
+
 function continueRelated(id){
   const q=qBy(id),axis=axisForQuestion(q);let qs=[];
   if(axis)qs=axisQuestions(q.subject,axis.id);
@@ -1752,6 +1790,7 @@ function latestDiagnosisRecords(){
   return st.attempts.filter(a=>a.type==='diag'&&(a.sessionId||`legacy-${dayKey(a.ts)}`)===id);
 }
 function finish(){
+  delete st.openSessions[ses.sessionId];
   if(ses.type==='diag'){
     const committed=[...ses.attempts],sessionId=ses.sessionId;
     st.attempts.push(...committed);
@@ -1774,7 +1813,7 @@ function finish(){
 
   save();const n=ses.attempts.length,ok=ses.attempts.filter(a=>a.correct).length,w=conceptScores().slice(0,5);
   S.innerHTML=`<div class="card"><h1>演習結果</h1><div class="stats"><div class="stat"><b>${ok}/${n}</b><span class="small">正解</span></div><div class="stat"><b>${Math.round(ok/n*100)}%</b><span class="small">正答率</span></div><div class="stat"><b>${dueIds().length}</b><span class="small">今日の復習</span></div></div><p class="muted">今回の結果を学習履歴に追加し、弱点分析を更新しました。</p><button class="btn" onclick="ses=null;NAV.classList.remove('hide');home()">ホームへ</button></div><div class="card"><h2>要復習候補</h2>${w.length?w.map(weakCard).join(''):'<p class="muted">まだありません。</p>'}</div>`;
-  NAV.classList.remove('hide');scrollTopNow();
+  ses=null;NAV.classList.remove('hide');scrollTopNow();
 }
 
 function screeningDomainResults(records){
@@ -2204,7 +2243,9 @@ function historyDetail(id,ts){
 }
 function resetData(){if(confirm('回答履歴・あとで調べる・途中の診断を含む学習データをすべて削除しますか？')){localStorage.removeItem(KEY);st={attempts:[],diagnosed:false,lookup:[],activeDiag:null,lastDiagSessionId:null};ses=null;save();home();}}
 function nav(p){document.querySelectorAll('.nav button').forEach(b=>b.classList.toggle('on',b.dataset.p===p));}
-document.querySelectorAll('.nav button').forEach(b=>{b.onclick=()=>{if(b.dataset.p==='home')home();else if(b.dataset.p==='weak')weak();else if(b.dataset.p==='lookup')lookupPage();else if(b.dataset.p==='hist')hist();else usagePage();};});
+document.querySelectorAll('.nav button').forEach(b=>{b.onclick=()=>{if(ses)suspendSession();if(b.dataset.p==='home')home();else if(b.dataset.p==='weak')weak();else if(b.dataset.p==='lookup')lookupPage();else if(b.dataset.p==='hist')hist();else usagePage();};});
+window.addEventListener('pagehide',()=>checkpointSession());
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden')checkpointSession();});
 updateLookupNav();home();
 if('serviceWorker' in navigator && (location.protocol==='https:' || location.hostname==='localhost' || location.hostname==='127.0.0.1')){
   window.addEventListener('load',async()=>{

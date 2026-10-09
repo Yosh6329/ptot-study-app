@@ -1,0 +1,61 @@
+{
+  "sourceIntegrity": {
+    "total": 480,
+    "active": 467,
+    "diagnosis": 446,
+    "domains": 26,
+    "groups": 67,
+    "allOptions": 2400
+  },
+  "allScoring": {
+    "acceptedPatterns": 491,
+    "rejectedSelections": 2279,
+    "renderedFeedback": 491
+  },
+  "sampling": {
+    "iterations": 100,
+    "modes": [
+      {
+        "mode": "all",
+        "length": 50,
+        "domains": 26
+      },
+      {
+        "mode": "anatomy",
+        "length": 20,
+        "domains": 10
+      },
+      {
+        "mode": "physiology",
+        "length": 20,
+        "domains": 11
+      },
+      {
+        "mode": "kinesiology",
+        "length": 20,
+        "domains": 5
+      }
+    ]
+  },
+  "history": {
+    "snapshots": 4,
+    "oldRecordsPreserved": 6,
+    "retired": 13,
+    "analysisVersionIsolation": true
+  },
+  "ui": {
+    "evidenceRows": 26,
+    "overflow": false
+  },
+  "images": 20,
+  "fullDiagnosis": {
+    "count": 50,
+    "diagnosed": true
+  },
+  "offline": true,
+  "standalone": {
+    "questions": 480,
+    "embeddedImages": 21
+  },
+  "errors": []
+}

@@ -1,0 +1,14 @@
+{
+  "navDraftResumeCases": 10,
+  "answeredResumeWithoutDuplicates": true,
+  "finishClearsSession": true,
+  "diagnosisDraft": true,
+  "multipleSessions": true,
+  "mobileWidths": [
+    320,
+    375,
+    390,
+    430
+  ],
+  "errors": []
+}
